@@ -83,3 +83,19 @@
       dest: "/tmp/kubernetes_join_command"
       flat: yes
   # End: get token to join cluster
+
+  # find / -name 10-kubeadm.conf
+  - name: Edit kubeadm.conf - config node ip
+    lineinfile:
+      path: '/lib/systemd/system/kubelet.service.d/10-kubeadm.conf'
+      line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}"'
+      regexp: 'KUBELET_EXTRA_ARGS='
+      insertafter: '\[Service\]'
+      state: present
+
+  handlers:
+  - name: restart kubelet
+    systemd:
+      state: restarted
+      name: kubelet
+      daemon_reload: true

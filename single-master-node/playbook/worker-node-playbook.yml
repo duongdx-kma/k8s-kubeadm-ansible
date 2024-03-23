@@ -18,3 +18,20 @@
 
   - debug:
       msg: "{{ joined_or_not.stdout }}"
+
+  # find / -name 10-kubeadm.conf
+  - name: Edit kubeadm.conf - config node ip
+    lineinfile:
+      path: '/lib/systemd/system/kubelet.service.d/10-kubeadm.conf'
+      line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}"'
+      regexp: 'KUBELET_EXTRA_ARGS='
+      insertafter: '\[Service\]'
+      state: present
+    notify: restart kubelet
+
+  handlers:
+    - name: restart kubelet
+      systemd:
+        state: restarted
+        name: kubelet
+        daemon_reload: true
