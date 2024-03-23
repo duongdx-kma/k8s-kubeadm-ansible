@@ -1,11 +1,11 @@
 all:
   hosts:
     master01:
-      ansible_host: 192.168.56.2
+      ansible_host: 192.168.56.11
     node01:
-      ansible_host: 192.168.56.6
+      ansible_host: 192.168.56.16
     node02:
-      ansible_host: 192.168.56.7
+      ansible_host: 192.168.56.17
 
   children:
     master_node:

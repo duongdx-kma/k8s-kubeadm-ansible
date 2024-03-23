@@ -4,3 +4,4 @@
 *.crt
 *.csr
 .idea
+*.vagrant

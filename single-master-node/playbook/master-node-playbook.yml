@@ -1,0 +1,85 @@
+- name: initial kubebernetes cluster
+  hosts: master_node
+  become: true
+  vars:
+    control_plane_endpoint: 192.168.56.11
+    flannel_version: 0.24.2
+  tasks:
+  # Start: reset existing cluster
+  - name: Reset existing cluster
+    shell: kubeadm reset -f
+
+  - name: Remove .kube in user home directory
+    shell: rm -rf .kube
+
+  - name: Remove /etc/kubernetes/manifests directory
+    shell: rm -rf /etc/kubernetes/manifests
+
+  - name: Remove /var/lib/etcd directory
+    shell: rm -rf /var/lib/etcd
+  # End: reset existing cluster
+
+  # Start: Initial cluster
+  - name: Init kubernetes cluster
+    shell: |
+      kubeadm init --control-plane-endpoint={{ control_plane_endpoint }}:6443 \
+      --cri-socket unix:///run/containerd/containerd.sock \
+      --upload-certs \
+      --apiserver-advertise-address={{ control_plane_endpoint }} \
+      --pod-network-cidr=10.244.0.0/16
+    register: kubeadmin_init
+
+  - debug: msg="{{ kubeadmin_init.stdout }}"
+
+  - name: Create .kube to home directory or master server
+    file:
+      path: "/home/{{ ansible_user }}/.kube"
+      state: directory
+      mode: 0755
+
+  - name: Copy admin.conf to user's kube config
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /home/{{ ansible_user }}/.kube/config
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0644
+      remote_src: yes
+  # End: Initial cluster
+
+  # Start: setting up CNI with flannel
+  - name: Copy kube-flannel-v{{ flannel_version }}.yml
+    copy:
+      src: "../kube-flannel-v{{ flannel_version }}.yml"
+      dest: "/home/{{ ansible_user }}/kube-flannel-v{{ flannel_version }}.yml"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0755
+
+  - name: Deploy CNI flannel
+    shell: "kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/{{ ansible_user }}/kube-flannel-v{{ flannel_version }}.yml"
+
+  - name: Restart kubelet service
+    service:
+      name: kubelet
+      daemon-reload: yes
+      state: restarted
+  # End: setting up CNI with flannel
+
+  # Start: get token to join cluster
+  - name: Get the token for joining the nodes with Kuberentes master.
+    shell: kubeadm token create  --print-join-command
+    register: kubernetes_join_command
+    become_user: "{{ ansible_user }}"
+
+  - name: Copy K8s Join command to file in master
+    copy:
+      content: "{{ kubernetes_join_command.stdout_lines[0] }}"
+      dest: "/tmp/kubernetes_join_command"
+
+  - name: Copy join command from master to local ansible server
+    fetch:
+      src: "/tmp/kubernetes_join_command"
+      dest: "/tmp/kubernetes_join_command"
+      flat: yes
+  # End: get token to join cluster
