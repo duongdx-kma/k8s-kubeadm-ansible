@@ -4,6 +4,7 @@
   vars:
     control_plane_endpoint: 192.168.56.11
     flannel_version: 0.24.2
+    architecture: amd64
   tasks:
   # Start: reset existing cluster
   - name: Reset existing cluster
@@ -43,7 +44,7 @@
       dest: /home/{{ ansible_user }}/.kube/config
       owner: "{{ ansible_user }}"
       group: "{{ ansible_user }}"
-      mode: 0644
+      mode: 0600
       remote_src: yes
   # End: Initial cluster
 
@@ -92,6 +93,26 @@
       regexp: 'KUBELET_EXTRA_ARGS='
       insertafter: '\[Service\]'
       state: present
+
+  # Start: install helm
+  - name: Add helm GPG key to APT keyring
+    ansible.builtin.apt_key:
+      keyring: "/usr/share/keyrings/helm.gpg"
+      url: "https://baltocdn.com/helm/signing.asc"
+      state: present
+
+  - name: Add Helm APT repository to sources.list
+    lineinfile:
+      path: "/etc/apt/sources.list.d/helm-stable-debian.list"
+      line: "deb [arch={{ architecture }} signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main"
+      create: yes
+
+  - name: install helm
+    apt:
+      name: helm
+      state: present
+      update_cache: yes
+  # End: install helm
 
   handlers:
   - name: restart kubelet

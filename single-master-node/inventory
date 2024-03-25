@@ -6,6 +6,8 @@ all:
       ansible_host: 192.168.56.16
     node02:
       ansible_host: 192.168.56.17
+    nfs_instance:
+      ansible_host: 192.168.56.198
 
   children:
     master_node:
@@ -17,10 +19,15 @@ all:
         node01:
         node02:
 
+    nfs_server:
+      hosts:
+        nfs_instance:
+
     mix_group:
       children:
         master_node:
         worker_node:
+        nfs_server:
       vars:
         ansible_user: deploy
         ansible_ssh_private_key_file: client.pem
