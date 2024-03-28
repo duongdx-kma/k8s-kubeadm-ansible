@@ -1,0 +1,11 @@
+tomcatPassword: tomcat123321
+service:
+  type: NodePort
+  nodePorts:
+    http: 30008
+
+persistence:
+  accessModes:
+    - ReadWriteOnce
+  size: 100M
+  storageClass: bitnami-nfs-delete
