@@ -5,3 +5,4 @@
 *.csr
 .idea
 *.vagrant
+*.log
