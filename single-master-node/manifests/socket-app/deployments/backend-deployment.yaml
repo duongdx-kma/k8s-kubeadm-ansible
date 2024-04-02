@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-app-deployment
+  labels:
+    app: java-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      run: java-app-pod
+  template:
+    metadata:
+      labels:
+        run: java-app-pod
+    spec:
+      containers:
+        - name: java-app
+          image: duong1200798/vprofile_java_app
+          ports:
+            - name: java-app-port
+              containerPort: 8088
+          env:
+            - name: APP_PORT
+              value: "8088"
+      initContainers:
+        - name: init-mysql
+          image: busybox
+          command: ['sh', '-c', 'until nslookup java-db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql; sleep 2; done;']
