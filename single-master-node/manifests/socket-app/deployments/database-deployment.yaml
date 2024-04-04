@@ -44,19 +44,8 @@ spec:
           - mountPath: /var/lib/mysql
             name: persistent-volume
 
-      # init container
-      initContainers:
-      - name: busybox
-        image: busybox
-        volumeMounts:
-          - name: persistent-volume
-            mountPath: /var/lib/mysql
-        command:
-          - /bin/sh
-          - -c
-          - echo 'hello'
-
       # volume configuration
       volumes:
       - name: persistent-volume
-        emptyDir: { }
+        persistentVolumeClaim:
+          claimName: database-pvc
