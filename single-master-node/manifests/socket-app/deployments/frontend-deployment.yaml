@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: frontend
+  name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - image: duong1200798/socket_app_react:v1
+        name: socket-app-react-6xmkq
+        ports:
+        - containerPort: 80
+        env:
+        - name: REACT_APP_WS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: front-configmap
+              key: websocket-url
+        - name: REACT_APP_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: front-configmap
+              key: api-url
+      # init container
+      initContainers:
+      - name: service-checker
+        image: busybox
+        command: [ 'sh', '-c', 'until nslookup backend.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for backend up; sleep 2; done;' ]

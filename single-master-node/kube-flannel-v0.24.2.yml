@@ -168,6 +168,7 @@ spec:
         command:
         - /opt/bin/flanneld
         args:
+        - --iface=enp0s8 # must add the right interface
         - --ip-masq
         - --kube-subnet-mgr
         resources:

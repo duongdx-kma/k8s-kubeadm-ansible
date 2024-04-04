@@ -1,29 +1,69 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: java-app-deployment
+  name: backend
   labels:
-    app: java-app
+    app: backend
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      run: java-app-pod
+      run: backend
   template:
     metadata:
       labels:
-        run: java-app-pod
+        run: backend
     spec:
       containers:
-        - name: java-app
-          image: duong1200798/vprofile_java_app
-          ports:
-            - name: java-app-port
-              containerPort: 8088
-          env:
-            - name: APP_PORT
-              value: "8088"
+      - name: backend
+        image: duong1200798/golang_backend:v1
+        ports:
+          - name: backend-port
+            containerPort: 8088
+        # config env
+        env:
+          - name: APP_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: backend-configmap
+                key: app-port
+          - name: APP_ENV
+            valueFrom:
+              configMapKeyRef:
+                key: app-env
+                name: backend-configmap
+          - name: DB_DRIVER
+            valueFrom:
+              configMapKeyRef:
+                key: db-driver
+                name: backend-configmap
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: db-host
+                name: backend-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: db-port
+                name: backend-configmap
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                key: db-user
+                name: database-secret
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: db-password
+                name: database-secret
+          - name: DB_DATABASE
+            valueFrom:
+              secretKeyRef:
+                key: db-database
+                name: database-secret
+      # init container
       initContainers:
-        - name: init-mysql
+        - name: service-checker
           image: busybox
-          command: ['sh', '-c', 'until nslookup java-db.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql; sleep 2; done;']
+          command: ['sh', '-c', 'until nslookup database.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mysql up; sleep 2; done;']

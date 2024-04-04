@@ -1,0 +1,16 @@
+## helm install socket-app-nfs --namespace storage nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
+#      --set nfs.server=192.168.56.198 \
+#      --set nfs.path=/mnt/retain \
+#      --set storageClass.reclaimPolicy=Retain \
+#      --set storageClass.name=socket-app-sc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: database-pvc
+spec:
+  storageClassName: socket-app-sc
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
