@@ -1,0 +1,22 @@
+{{- $root := . -}} # use default value
+{{ range $key, $value := .Values.image.repositories }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $key }}
+  {{- with $value.labels }}
+  labels:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ $value.serviceType }}
+  ports:
+    - port: {{ $value.port }}
+      targetPort: {{ $value.port }}
+      protocol: TCP
+  {{- with $value.labels }}
+  selector:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+{{- end}}
