@@ -1,7 +1,7 @@
 apiVersion: v1
 data:
-  api-url: http://backend
-  websocket-url: ws://backend
+  api-url: http://192.168.56.16:31369/api #need a endpoint, which client browser can access
+  websocket-url: ws://192.168.56.16:31369/api/ws #need a endpoint, which client browser can access
 kind: ConfigMap
 metadata:
   name: front-configmap
