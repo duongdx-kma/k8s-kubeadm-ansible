@@ -244,7 +244,7 @@ ingress-nginx:
   controller:
     scope:
       enabled: true
-      namespace: "socket-namespace" # --------------------------------------------
+      namespace: "socket-namespace" # let's check it--------------------------------------------
     nodeSelector:
       kubernetes.io/hostname: node01 # check your node
     ingressClass: nginx
