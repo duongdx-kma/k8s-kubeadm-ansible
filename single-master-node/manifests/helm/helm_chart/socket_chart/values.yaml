@@ -245,6 +245,7 @@ ingress-nginx:
     scope:
       enabled: true
       #namespace: "socket-namespace" # let's check it--------------------------------------------
+      # get namespace's labels: kubectl get namespace "namespace-name" --show-labels
       namespaceSelector: "app=nginx-ingress" # must run: kubectl label namespace "namespace-name" app=nginx-ingress
     nodeSelector:
       kubernetes.io/hostname: node01 # check your node
