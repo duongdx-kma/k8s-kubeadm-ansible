@@ -233,14 +233,30 @@ initContainers:
   # ---
   database: []
 
+# Addition initContainers on the output Deployment definition
+resources:
+  # backend resources
+  backend:
+    requests:
+      memory: "128Mi"
+      cpu: "64m"
+    limits:
+      memory: "250Mi"
+      cpu: "250m"
+  # frontend resources
+  frontend: {}
+  # database resources
+  database: {}
+
 nodeSelector: {}
 
 tolerations: []
 
 affinity: {}
 
-# Dependencies configuration
+# Dependencies configuration: ingress-nginx
 ingress-nginx:
+  enabled: true
   controller:
     scope:
       enabled: true
@@ -256,8 +272,9 @@ ingress-nginx:
         http: 30098
         https: 30443
 
-
+# Dependencies configuration: nfs server for mysql
 socket-app-nfs:
+  enabled: true
   nfs:
     server: 192.168.56.198
     path: /mnt/mysql
@@ -270,4 +287,31 @@ socket-app-nfs:
     onDelete: retain
     reclaimPolicy: Retain
 
+# Dependencies configuration: metrics-server
+# Addition horizontal pod scale:
+horizontalPortCscale:
+  backend:
+    maxReplicas: 5
+    minReplicas: 2
+    scaleTargetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: backend
+    targetCPUUtilizationPercentage: 60
+  frontend: {}
+  database: {}
+
+metricServerEnable:
+  backend: true
+  frontend: false
+  database: false
+
+metrics-server:
+  enabled: true
+  defaultArgs:
+    - --cert-dir=/tmp
+    - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+    - --kubelet-use-node-status-port
+    - --metric-resolution=15s
+    - --kubelet-insecure-tls # must add for running
 

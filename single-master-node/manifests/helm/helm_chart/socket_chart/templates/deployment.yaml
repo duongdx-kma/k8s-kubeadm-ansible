@@ -42,6 +42,11 @@ spec:
             - name: http
               containerPort: {{ $value.port }}
               protocol: TCP
+          #config pod resources
+          {{- with get $root.Values.resources $key  }}
+          resources:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
 
           # env configuration
           {{- with get $root.Values.environmentVarialbes $key }}
