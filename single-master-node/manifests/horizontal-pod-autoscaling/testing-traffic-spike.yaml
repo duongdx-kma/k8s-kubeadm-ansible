@@ -1,0 +1,30 @@
+# kubectl create deployment testing-traffic-spike --image=busybox:1.28 --replicas=5 --dry-run=client -o yaml > testing-traffic-spike.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: testing-traffic-spike
+  name: testing-traffic-spike
+spec:
+  replicas: 25
+  selector:
+    matchLabels:
+      app: testing-traffic-spike
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: testing-traffic-spike
+    spec:
+      containers:
+      - image: busybox:1.28
+        name: busybox
+        resources: {}
+        args:
+          - /bin/sh
+          - -c
+          - "while sleep 0.01; do wget -q -O- http://backend:8088; done"
+status: {}
