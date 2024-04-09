@@ -1,0 +1,82 @@
+- name: Provision nfs server
+  become: yes
+  hosts: nfs_server
+  vars:
+    ip_range: "192.168.56.0/24"
+    retain_mounting_dir: /mnt/retain
+    delete_mounting_dir: /mnt/delete
+    mysql_mounting_dir: /mnt/mysql
+  tasks:
+  # start NFS server configuration
+  - name: apt update cache
+    apt:
+      update_cache: yes
+
+  - name: install package
+    apt:
+      name:
+        - nfs-kernel-server
+        - firewalld
+      state: present
+
+  - name: make sharing directory
+    file:
+      path: "{{ item }}"
+      state: directory
+      owner: nobody
+      group: nogroup
+      mode: 0777
+    loop:
+      - "{{ retain_mounting_dir}}"
+      - "{{ delete_mounting_dir}}"
+      - "{{ mysql_mounting_dir}}"
+
+  - name: start nfs-kernel-server
+    service:
+      name: nfs-kernel-server
+      state: started
+      enabled: true
+
+  - name: Edit /etc/exports -> expose nfs path
+    lineinfile:
+      path: '/etc/exports'
+      line: '{{ item }}'
+      state: present
+    with_items:
+      - "{{ retain_mounting_dir }}    {{ ip_range }}(rw,sync,no_subtree_check)"
+      - "{{ delete_mounting_dir }}    {{ ip_range }}(rw,sync,no_subtree_check)"
+      - "{{ mysql_mounting_dir }}    {{ ip_range }}(rw,sync,no_subtree_check,all_squash,anonuid=999,anongid=999)"
+
+  - name: Run exportfs -a command
+    command: exportfs -a
+    notify: restart nfs-kernel-server
+  # End NFS server configuration
+
+  # START firewalld configuration
+  - name: Config Firewalld allow 'nfs' protocol
+    firewalld:
+      service: nfs
+      permanent: yes
+      state: enabled
+    notify: Restart Firewalld
+
+  - name: Config Firewalld allow '111/tcp' protocol
+    firewalld:
+      port: '111/tcp'
+      permanent: yes
+      state: enabled
+    notify: Restart Firewalld
+  # END firewalld configuration
+
+  # checking : showmount -e 192.168.56.198
+
+  handlers:
+    - name: restart nfs-kernel-server
+      service:
+        name: nfs-kernel-server
+        state: restarted
+
+    - name: Restart Firewalld
+      service:
+        name: firewalld
+        state: restarted

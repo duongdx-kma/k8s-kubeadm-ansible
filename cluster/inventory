@@ -1,0 +1,51 @@
+all:
+  hosts:
+    master01:
+      ansible_host: 192.168.56.11
+    master02:
+      ansible_host: 192.168.56.12
+    node01:
+      ansible_host: 192.168.56.16
+    node02:
+      ansible_host: 192.168.56.17
+    nfs_instance:
+      ansible_host: 192.168.56.198
+    haproxy_instance:
+      ansible_host: 192.168.56.167
+
+  children:
+    master_node:
+      hosts:
+        master01:
+        master02:
+
+    primary_master_node:
+      hosts:
+        master01:
+
+    standby_master_node:
+      hosts:
+        master02:
+
+    worker_node:
+      hosts:
+        node01:
+        node02:
+
+    nfs_server:
+      hosts:
+        nfs_instance:
+
+    load_balancer:
+      hosts:
+        haproxy_instance:
+
+    mix_group:
+      children:
+        master_node:
+        worker_node:
+        nfs_server:
+        load_balancer:
+      vars:
+        ansible_user: deploy
+        ansible_ssh_private_key_file: client.pem

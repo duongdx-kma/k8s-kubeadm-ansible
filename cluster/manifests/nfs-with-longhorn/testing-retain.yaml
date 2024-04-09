@@ -1,0 +1,48 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: longhorn-storage-retain
+provisioner: driver.longhorn.io
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+parameters:
+  numberOfReplicas: "2"
+  staleReplicaTimeout: "2880"
+  fromBackup: ""
+  fsType: "ext4"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: longhorn-pvc-retain
+spec:
+  accessModes:
+    #- ReadWriteOnce
+    - ReadWriteMany
+  storageClassName: longhorn-storage-retain
+  resources:
+    requests:
+      storage: 10M
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-longhorn-retain
+spec:
+  volumes:
+    - name: longhorn-pvc-retain
+      persistentVolumeClaim:
+        claimName: longhorn-pvc-retain
+  containers:
+    - name: my-container
+      volumeMounts:
+        - name: longhorn-pvc-retain # This is the name of the volume we set at the pod level
+          mountPath: /var/simple # Where to mount this directory in our container
+
+      # Now that we have a directory mounted at /var/simple, let's
+      # write to a file inside it!
+      image: alpine
+      command: ["/bin/sh"]
+      args: ["-c", "while true; do date >> /var/simple/file.txt; sleep 5; done"]

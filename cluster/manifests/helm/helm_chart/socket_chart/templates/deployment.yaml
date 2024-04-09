@@ -1,0 +1,96 @@
+{{- $root := . -}} # use default value
+{{ range $key, $value := .Values.image.repositories }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $key }}
+  {{- with $value.labels }}
+  labels:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ get $root.Values.replication $key }}
+  selector:
+    matchLabels:
+      {{- with $value.labels }}
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+  template:
+    metadata:
+      {{- with $root.Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- with $value.labels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with $root.Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml $root.Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ $key }}
+          securityContext:
+            {{- toYaml $root.Values.securityContext | nindent 12 }}
+          image: "{{ $value.image }}:{{ $value.tag | default $root.Chart.AppVersion }}"
+          imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $value.port }}
+              protocol: TCP
+          #config pod resources
+          {{- with get $root.Values.resources $key  }}
+          resources:
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          # env configuration
+          {{- with get $root.Values.environmentVarialbes $key }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+          # mounting volume
+          {{- with get $root.Values.volumeMounts $key }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+
+
+      # define init container
+      {{- with get $root.Values.initContainers $key }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # define pod volumes
+      {{- with get $root.Values.volumes $key }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # define node selector
+      {{- with $root.Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # define pod affinity
+      {{- with $root.Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # define pod tolerations
+      {{- with $root.Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+{{- end }}
+
+

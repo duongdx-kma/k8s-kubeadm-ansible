@@ -1,0 +1,221 @@
+- name: initial kubebernetes cluster
+  hosts: primary_master_node # only initiate cluster on primary master node
+  become: true
+  vars:
+    control_plane_lb_endpoint: 192.168.56.167 # haproxy endpoint
+    primary_master_node_endpoint: 192.168.56.11 # because our virtual machine will have 2 ethernet => we should specify the ip of ethernet, node will communicate to each other.
+    flannel_version: 0.24.2
+    architecture: amd64
+    host_ip_string: "host_ip_here"
+  tasks:
+  # Start: reset existing cluster
+  - name: Reset existing cluster
+    shell: kubeadm reset -f
+
+  - name: Remove .kube in user home directory
+    shell: rm -rf .kube
+
+  - name: Remove /etc/kubernetes/manifests directory
+    shell: rm -rf /etc/kubernetes/manifests
+
+  - name: Remove /var/lib/etcd directory
+    shell: rm -rf /var/lib/etcd
+  # End: reset existing cluster
+
+  # Start: Initial cluster
+  - name: Init kubernetes cluster
+    shell: |
+      kubeadm init --control-plane-endpoint={{ control_plane_lb_endpoint }}:6443 \
+      --cri-socket unix:///run/containerd/containerd.sock \
+      --upload-certs \
+      --apiserver-advertise-address={{ primary_master_node_endpoint }} \
+      --pod-network-cidr=10.244.0.0/16
+    register: kubeadmin_init
+
+  - debug: msg="{{ kubeadmin_init.stdout }}"
+
+  - name: Create .kube to home directory or master server
+    file:
+      path: "/home/{{ ansible_user }}/.kube"
+      state: directory
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0755
+
+  - name: Copy admin.conf to user's kube config
+    copy:
+      src: /etc/kubernetes/admin.conf
+      dest: /home/{{ ansible_user }}/.kube/config
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0600
+      remote_src: yes
+  # End: Initial cluster
+
+  # Start: setting up CNI with flannel
+  - name: Copy kube-flannel-v{{ flannel_version }}.yml
+    copy:
+      src: "../kube-flannel-v{{ flannel_version }}.yml"
+      dest: "/home/{{ ansible_user }}/kube-flannel-v{{ flannel_version }}.yml"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0755
+
+  - name: Deploy CNI flannel
+    shell: "kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/{{ ansible_user }}/kube-flannel-v{{ flannel_version }}.yml"
+
+  - name: Restart kubelet service
+    service:
+      name: kubelet
+      daemon-reload: yes
+      state: restarted
+  # End: setting up CNI with flannel
+
+  # Start: get token to join cluster
+  - name: Get the token for joining the nodes with Kuberentes master.
+    shell: kubeadm token create  --print-join-command
+    register: kubernetes_join_command
+    become_user: "{{ ansible_user }}"
+
+  - debug:
+      msg: "{{ kubernetes_join_command }}"
+
+  - name: Copy K8s Join command to file in master
+    copy:
+      content: "{{ kubernetes_join_command.stdout_lines[0] }}"
+      dest: "/tmp/kubernetes_join_command"
+
+  - name: Copy join command from master to local ansible server
+    fetch:
+      src: "/tmp/kubernetes_join_command"
+      dest: "/tmp/kubernetes_join_command"
+      flat: yes
+  # End: get token to join cluster
+
+  # Start: get token for standby master node joining to cluster
+  - name: Generate certificate key
+    shell: kubeadm init phase upload-certs --upload-certs
+    register: kubernetes_certificate_key
+    run_once: yes
+
+  - name: make master join command  #must set apiserver-advertise-address = standby-master-ip-address
+    copy:
+      content: "
+      {{ kubernetes_join_command.stdout_lines[0] }} \
+      --control-plane --certificate-key {{ kubernetes_certificate_key.stdout_lines[2] }} \
+      --apiserver-advertise-address={{ host_ip_string }}
+      "
+      dest: "/tmp/kubernetes_join_master_command"
+
+  - name: Execute master join command
+    fetch:
+      src: "/tmp/kubernetes_join_master_command"
+      dest: "/tmp/kubernetes_join_master_command"
+      flat: yes
+  # END: get token for standby master node joining to cluster
+
+  # find / -name 10-kubeadm.conf
+  - name: Edit kubeadm.conf - config node ip
+    lineinfile:
+      path: '/lib/systemd/system/kubelet.service.d/10-kubeadm.conf'
+      line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}"'
+      regexp: 'KUBELET_EXTRA_ARGS='
+      insertafter: '\[Service\]'
+      state: present
+
+  handlers:
+  - name: restart kubelet
+    systemd:
+      state: restarted
+      name: kubelet
+      daemon_reload: true
+
+###############################
+# join standby master nodes to cluster
+##############################
+- name: initiate standby master node
+  become: yes
+  hosts: standby_master_node # standby master node will join cluster
+  vars:
+    host_ip_string: "host_ip_here"
+  tasks:
+    - name: Copy token to worker nodes
+      copy:
+        src: /tmp/kubernetes_join_master_command
+        dest: /tmp/kubernetes_join_master_command
+        mode: 0777
+
+    - name: Resetting kubeadm
+      shell: kubeadm reset -f
+
+    - name: Add key params to join command #must set apiserver-advertise-address = standby-master-ip-address
+      shell: "sed -i 's/{{ host_ip_string }}/{{ ansible_host }}/g' /tmp/kubernetes_join_master_command"
+
+    - name: Join the standby master nodes to cluster
+      become: yes
+      command: sh /tmp/kubernetes_join_master_command
+      register: standby_joined_or_not
+
+    - debug:
+        msg: "{{ standby_joined_or_not.stdout }}"
+
+    - name: Create .kube to home directory or master server
+      file:
+        path: "/home/{{ ansible_user }}/.kube"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0755
+
+    - name: Copy admin.conf to user's kube config
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /home/{{ ansible_user }}/.kube/config
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: 0600
+        remote_src: yes
+
+    # find / -name 10-kubeadm.conf
+    - name: Edit kubeadm.conf - config node ip
+      lineinfile:
+        path: '/lib/systemd/system/kubelet.service.d/10-kubeadm.conf'
+        line: 'Environment="KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}"'
+        regexp: 'KUBELET_EXTRA_ARGS='
+        insertafter: '\[Service\]'
+        state: present
+      notify: restart kubelet
+
+  handlers:
+    - name: restart kubelet
+      systemd:
+        state: restarted
+        name: kubelet
+        daemon_reload: true
+
+###############################
+# install helm to all node
+###############################
+- name: install helm to all master node
+  become: yes
+  hosts: master_node # all node
+  vars:
+    architecture: amd64
+  tasks:
+    - name: Add helm GPG key to APT keyring
+      apt_key:
+        keyring: "/usr/share/keyrings/helm.gpg"
+        url: "https://baltocdn.com/helm/signing.asc"
+        state: present
+
+    - name: Add Helm APT repository to sources.list
+      lineinfile:
+        path: "/etc/apt/sources.list.d/helm-stable-debian.list"
+        line: "deb [arch={{ architecture }} signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main"
+        create: yes
+
+    - name: install helm
+      apt:
+        name: helm
+        state: present
+        update_cache: yes

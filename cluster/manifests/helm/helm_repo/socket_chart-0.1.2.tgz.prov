@@ -1,0 +1,37 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+apiVersion: v2
+appVersion: 0.1.0
+dependencies:
+- - name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 4.10.0
+- - alias: socket-app-nfs
+  name: nfs-subdir-external-provisioner
+  repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+  version: 4.0.18
+description: A Helm chart for Kubernetes
+maintainers:
+- - email: xuanduong.kma@gmail.com
+  name: duongdx
+name: socket_chart
+type: application
+version: 0.1.2
+
+...
+files:
+  socket_chart-0.1.2.tgz: sha256:564a99ceac913fee2f55d8c9c52f494e7d2f975460753d517e80c3190546692a
+-----BEGIN PGP SIGNATURE-----
+
+wsDcBAEBCgAQBQJmEjPcCRCQ9pk7g1pdWAAAfKIMAGumBXfLuEd8TtPZVcJ7Gn7O
+d92vjcRgOKdokP+LQBEmLnBhIN1AMvBYjtoUZl1cS4Z/Nqx+ua8N3csddzALrfy7
+v1FZlkKFaxgFvj/1GFYGvJaAZAmYVUrok3gHHdYi943rXqVkepoUfG6QG4bu4uUO
+huFz/2zBAUhPZwllzsrNQZLFjRdgiTexPiuu0d5wpQcscqenrHOi3PgamJkznfIk
+n6SQEqNVB7Mhj5BeKJbT+VKEZkARjgAzMe/jjo1N0ddEAoqgITPKU9+w3fbdqJBd
+xLSYxLVeNKGQXoDfwDo3gr3XoOmjkZOCPhD0r4qo/LEaWz9ndSE7Q4MsBxfUhNXX
+Ndte2CUck6PcUW8plOuRoS96M9bFBlWmRSjZPRlXUA7SRA1pBEtbdUHHue8wcXva
+JPuMGWnxlq76LvOfHVWzpUE2A9cJ6AkE6gjnCt6eGaKD++hktAHvvKcD8obfRamQ
++M12+k4UZv0C6/aTJ2OIrtxiP/mke4bFyGbX5z4xpQ==
+=FNQN
+-----END PGP SIGNATURE-----

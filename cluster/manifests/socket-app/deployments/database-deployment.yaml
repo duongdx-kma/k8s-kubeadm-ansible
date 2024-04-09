@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: database
+  name: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - image: duong1200798/socket_app_mysql:v1
+        name: socket-app-mysql-p55wc
+        ports:
+        - containerPort: 3306
+        env:
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: db-user
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: db-password
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: db-password
+          - name: MYSQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: database-secret
+                key: db-database
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: persistent-volume
+
+      # volume configuration
+      volumes:
+      - name: persistent-volume
+        persistentVolumeClaim:
+          claimName: database-pvc

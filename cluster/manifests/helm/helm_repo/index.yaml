@@ -1,0 +1,151 @@
+apiVersion: v1
+entries:
+  firstchart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-08T17:17:57.895294067Z"
+    dependencies:
+    - import-values:
+      - child: image
+        parent: tomcatImage
+      name: tomcat
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - enabled
+      version: 10.17.2
+    - condition: mysql.enabled
+      name: mysql
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.1.0
+    - alias: testing-nfs-subdir-external-provisioner
+      condition: testing-nfs-subdir-external-provisioner.enabled
+      name: nfs-subdir-external-provisioner
+      repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      version: 4.0.18
+    - alias: just-test-nfs-subdir-external-provisioner
+      condition: just-test-nfs-subdir-external-provisioner.enabled
+      name: nfs-subdir-external-provisioner
+      repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      version: 4.0.18
+    description: A Helm chart for Kubernetes
+    digest: 992430df5834b1de49c2fd0b7cc9d95296acbe7082e69bc13cd514a9bff35699
+    maintainers:
+    - email: xuanduong.kma@gmail.com
+      name: duongdx
+    name: firstchart
+    type: application
+    urls:
+    - firstchart-0.1.0.tgz
+    version: 0.1.0
+  fourstchart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-08T17:17:57.895905298Z"
+    description: A Helm chart for Kubernetes
+    digest: ea822fa8e3c37da110bea2e201748c73c6793bd8ce90f1b2654cd8cb13d66fd9
+    name: fourstchart
+    type: application
+    urls:
+    - fourstchart-0.1.0.tgz
+    version: 0.1.0
+  nginx-signed-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-08T17:17:57.896573613Z"
+    description: A Helm chart for Kubernetes
+    digest: 6ba658f8d4bc39972070c55d8fda4426e3683f91be8673af71618651adf1c48e
+    name: nginx-signed-chart
+    type: application
+    urls:
+    - nginx-signed-chart-0.1.0.tgz
+    version: 0.1.0
+  secondchart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-08T17:17:57.89715274Z"
+    description: A Helm chart for Kubernetes
+    digest: dfd53331a4c926a75ea5c3ae9787cbc997bdccd73c223e790961e7f87fff6817
+    name: secondchart
+    type: application
+    urls:
+    - secondchart-0.1.0.tgz
+    version: 0.1.0
+  socket_chart:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-04-08T17:17:57.915754976Z"
+    dependencies:
+    - name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.10.0
+    - alias: socket-app-nfs
+      name: nfs-subdir-external-provisioner
+      repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      version: 4.0.18
+    - name: metrics-server
+      repository: https://kubernetes-sigs.github.io/metrics-server
+      version: 3.12.1
+    description: DuongDX socket app - golang - react - mysql
+    digest: e439006fccb373f49e283330e92eb90278b9dc1f274654c81fa575bb1f65505a
+    maintainers:
+    - email: xuanduong.kma@gmail.com
+      name: duongdx
+    name: socket_chart
+    type: application
+    urls:
+    - socket_chart-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2024-04-08T17:17:57.908034814Z"
+    dependencies:
+    - name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.10.0
+    - alias: socket-app-nfs
+      name: nfs-subdir-external-provisioner
+      repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      version: 4.0.18
+    description: A Helm chart for Kubernetes
+    digest: 564a99ceac913fee2f55d8c9c52f494e7d2f975460753d517e80c3190546692a
+    maintainers:
+    - email: xuanduong.kma@gmail.com
+      name: duongdx
+    name: socket_chart
+    type: application
+    urls:
+    - socket_chart-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-08T17:17:57.902236893Z"
+    dependencies:
+    - name: ingress-nginx
+      repository: https://kubernetes.github.io/ingress-nginx
+      version: 4.10.0
+    - alias: socket-app-nfs
+      name: nfs-subdir-external-provisioner
+      repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+      version: 4.0.18
+    description: A Helm chart for Kubernetes
+    digest: c849acd78a17508f446a35e2cb407d799a0dce9005cd83a125e985ff7cc88524
+    maintainers:
+    - email: xuanduong.kma@gmail.com
+      name: duongdx
+    name: socket_chart
+    type: application
+    urls:
+    - socket_chart-0.1.0.tgz
+    version: 0.1.0
+  thirstchart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-04-08T17:17:57.91660098Z"
+    description: A Helm chart for Kubernetes
+    digest: 6c8b4d9bc1ecea7ad65c6160aff5b6f2d2cf71f4015dca143eb8561697a6ecf9
+    name: thirstchart
+    type: application
+    urls:
+    - thirstchart-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-04-08T17:17:57.885530097Z"
