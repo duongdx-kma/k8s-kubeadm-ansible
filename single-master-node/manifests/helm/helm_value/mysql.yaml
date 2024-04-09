@@ -1,8 +1,0 @@
-auth:
-  rootPassword: duongdxx98
-primary:
-  persistence:
-    accessModes:
-    - ReadWriteOnce
-    size: 100M
-    storageClass: bitnami-nfs-delete
