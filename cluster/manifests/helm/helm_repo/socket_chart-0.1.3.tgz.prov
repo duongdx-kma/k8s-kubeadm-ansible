@@ -1,0 +1,40 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+apiVersion: v2
+appVersion: 0.1.0
+dependencies:
+- - name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 4.10.0
+- - alias: socket-app-nfs
+  name: nfs-subdir-external-provisioner
+  repository: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+  version: 4.0.18
+- - name: metrics-server
+  repository: https://kubernetes-sigs.github.io/metrics-server
+  version: 3.12.1
+description: DuongDX socket app - golang - react - mysql
+maintainers:
+- - email: xuanduong.kma@gmail.com
+  name: duongdx
+name: socket_chart
+type: application
+version: 0.1.3
+
+...
+files:
+  socket_chart-0.1.3.tgz: sha256:e439006fccb373f49e283330e92eb90278b9dc1f274654c81fa575bb1f65505a
+-----BEGIN PGP SIGNATURE-----
+
+wsDcBAEBCgAQBQJmFCaNCRCQ9pk7g1pdWAAAlo8MAIyf3yYtabs5Iz4N4D6YLbHz
+mqjcZRSIKzDbFdTqQ6uEr2+SmRisdTwHy83MD6YFiWWVPoQEvYuPM1ME1M7ke9/S
+Y9s4R7OZG824h09m92Gy7ToE3x8w/KKm6tN/04F047U8M9HEVZaUmF/8Gup0upDe
+xFrgsLqNvxbxOmE6h/+y3LfD/1G/CUp2VPNRJoAfiTSZEvmqjm1elGdOmIuh+VKe
+3ANPK04QOPm2AkkimIubOBUxSog86p61ULxywbQKSwJFwjp/zgzBGVLp5y8uu/Tk
+Uh2c/t9wmL+Xoy6r4nZ/lrzOfS5D/ASkXR7z28Hu+t7WrRjl6ZIbaKIXUZo0vywU
+4LmcRfnSwuPScIcpUCSOKuFUlHgP6mcPlSNDVi8+TXgUIiOGhyF1owrczLB5icIv
+tOi1kvxFOsvdI1Eee9nx33NMilXZ2qXGyK3XanyShqPdaKnigotk0OsaxrwtjL+j
+fN7mQJIX3dUVeB8Hktfga0JjqChfysggz88p/g+OvQ==
+=wKm2
+-----END PGP SIGNATURE-----

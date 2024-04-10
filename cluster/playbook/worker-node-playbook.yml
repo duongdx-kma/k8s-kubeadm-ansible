@@ -10,7 +10,6 @@
 
   - name: Resetting kubeadm
     shell: kubeadm reset -f
-    register: output
 
   - name: Join the Worker nodes with the master.
     command: sh /tmp/kubernetes_join_command
