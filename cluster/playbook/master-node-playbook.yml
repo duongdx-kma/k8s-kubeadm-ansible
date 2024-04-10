@@ -1,12 +1,8 @@
 - name: initial kubebernetes cluster
   hosts: primary_master_node # only initiate cluster on primary master node
   become: true
-  vars:
-    control_plane_lb_endpoint: 192.168.56.167 # haproxy endpoint
-    primary_master_node_endpoint: 192.168.56.11 # because our virtual machine will have 2 ethernet => we should specify the ip of ethernet, node will communicate to each other.
-    flannel_version: 0.24.2
-    architecture: amd64
-    host_ip_string: "host_ip_here"
+  vars_files:
+    - vars.yaml
   tasks:
   # Start: reset existing cluster
   - name: Reset existing cluster
@@ -28,7 +24,7 @@
       kubeadm init --control-plane-endpoint={{ control_plane_lb_endpoint }}:6443 \
       --cri-socket unix:///run/containerd/containerd.sock \
       --upload-certs \
-      --apiserver-advertise-address={{ primary_master_node_endpoint }} \
+      --apiserver-advertise-address={{ ansible_host }} \
       --pod-network-cidr=10.244.0.0/16
     register: kubeadmin_init
 
@@ -136,8 +132,8 @@
 - name: initiate standby master node
   become: yes
   hosts: standby_master_node # standby master node will join cluster
-  vars:
-    host_ip_string: "host_ip_here"
+  vars_files:
+    - vars.yaml
   tasks:
     - name: Copy token to worker nodes
       copy:
@@ -199,8 +195,8 @@
 - name: install helm to all master node
   become: yes
   hosts: master_node # all node
-  vars:
-    architecture: amd64
+  vars_files:
+    - vars.yaml
   tasks:
     - name: Add helm GPG key to APT keyring
       apt_key:

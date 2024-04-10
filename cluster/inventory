@@ -10,8 +10,10 @@ all:
       ansible_host: 192.168.56.17
     nfs_instance:
       ansible_host: 192.168.56.198
-    haproxy_instance:
-      ansible_host: 192.168.56.167
+    haproxy01:
+      ansible_host: 192.168.56.31
+    haproxy02:
+      ansible_host: 192.168.56.32
 
   children:
     master_node:
@@ -38,7 +40,8 @@ all:
 
     load_balancer:
       hosts:
-        haproxy_instance:
+        haproxy01:
+        haproxy02:
 
     mix_group:
       children:

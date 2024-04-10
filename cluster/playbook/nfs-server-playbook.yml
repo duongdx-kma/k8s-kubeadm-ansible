@@ -1,11 +1,8 @@
 - name: Provision nfs server
   become: yes
   hosts: nfs_server
-  vars:
-    ip_range: "192.168.56.0/24"
-    retain_mounting_dir: /mnt/retain
-    delete_mounting_dir: /mnt/delete
-    mysql_mounting_dir: /mnt/mysql
+  vars_files:
+    - vars.yaml
   tasks:
   # start NFS server configuration
   - name: apt update cache

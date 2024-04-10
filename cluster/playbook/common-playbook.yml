@@ -1,10 +1,8 @@
 - name: setup master and workers
   hosts: master_node, worker_node
   become: true
-  vars:
-    os_version: ubuntu
-    crio_version: v1.29
-    k8s_version: 1.29.3-1.1
+  vars_files:
+    - vars.yaml
   tasks:
   - name: Disable swap
     shell: swapoff -a

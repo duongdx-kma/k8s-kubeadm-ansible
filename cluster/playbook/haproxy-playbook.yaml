@@ -1,6 +1,8 @@
 - name: Setup load balancers
   hosts: load_balancer
   become: yes
+  vars_files:
+    - vars.yaml
   tasks:
     - name: Install haproxy
       apt:
@@ -8,34 +10,36 @@
         state: present
         update_cache: yes
 
-    - name: Create haproxy conf empty file
-      copy:
-        content: ""
-        dest: /etc/haproxy/haproxy.cfg
-        force: yes
-
     - name: Configure haproxy
-      shell: |
-        cat <<EOF | sudo tee /etc/haproxy/haproxy.cfg
-        frontend kubernetes-frontend
-          bind *:6443
-          mode tcp
-          option tcplog
-          default_backend kubernetes-backend
-
-        backend kubernetes-backend
-          option httpchk GET /healthz
-          http-check expect status 200
-          mode tcp
-          option ssl-hello-chk
-          balance roundrobin
-            server k8s-master01 192.168.56.11:6443 check fall 3 rise 2
-            server k8s-master02 192.168.56.12:6443 check fall 3 rise 2
-        EOF
+      template:
+        src: ../templates/haproxy.cfg
+        dest: /etc/haproxy/haproxy.cfg
 
     - name: Restart haproxy
       systemd:
         name: haproxy
+        state: restarted
+        enabled: yes
+        daemon-reload: yes
+
+    # Keepalived for Virtual IP
+    - name: Install keepalived
+      apt:
+        name:
+          - keepalived
+        state: present
+        update_cache: yes
+
+    - name: Create keepalived.conf
+      template:
+        src: ../templates/keepalived.conf
+        dest: /etc/keepalived/keepalived.conf
+      notify: Restart keepalived
+
+  handlers:
+    - name: Restart keepalived
+      systemd:
+        name: keepalived
         state: restarted
         enabled: yes
         daemon-reload: yes
