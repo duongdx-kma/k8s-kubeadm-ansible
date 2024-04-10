@@ -1,0 +1,26 @@
+# k8s variables:
+os_version: ubuntu
+crio_version: v1.29
+k8s_version: 1.29.3-1.1
+architecture: amd64
+host_ip_string: "host_ip_here"
+flannel_version: 0.24.2
+
+# haproxy variables:
+master01: 192.168.56.11
+master02: 192.168.56.12
+node01: 192.168.56.16
+node02: 192.168.56.17
+http_node_port: 30098
+https_node_port: 30443
+
+# keepalived variables:
+interface: enp0s8
+# haproxy endpoint. this VIP: virtual IP
+control_plane_lb_endpoint: 192.168.56.167
+
+# nfs variables:
+ip_range: "192.168.56.0/24"
+retain_mounting_dir: /mnt/retain
+delete_mounting_dir: /mnt/delete
+mysql_mounting_dir: /mnt/mysql
