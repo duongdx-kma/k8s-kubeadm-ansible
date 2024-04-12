@@ -14,6 +14,8 @@ all:
       ansible_host: 192.168.56.31
     haproxy02:
       ansible_host: 192.168.56.32
+    haproxy03:
+      ansible_host: 192.168.56.33
 
   children:
     master_node:
@@ -42,6 +44,7 @@ all:
       hosts:
         haproxy01:
         haproxy02:
+        haproxy03:
 
     mix_group:
       children:

@@ -18,6 +18,9 @@ https_node_port: 30443
 interface: enp0s8
 # haproxy endpoint. this VIP: virtual IP
 control_plane_lb_endpoint: 192.168.56.167
+keepalived_master_state: MASTER
+keepalived_master_backup: BACKUP
+keepalived_priority_default: 200
 
 # nfs variables:
 ip_range: "192.168.56.0/24"

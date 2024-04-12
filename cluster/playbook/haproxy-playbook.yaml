@@ -30,11 +30,33 @@
         state: present
         update_cache: yes
 
-    - name: Create keepalived.conf
+    - name: Get host index
+      debug:
+        msg: "Index of {{ item }} is {{ ansible_play_hosts.index(item) }}"
+      with_items: "{{ ansible_play_hosts  }}"
+      run_once: true
+
+    - name: Create master keepalived.conf
       template:
         src: ../templates/keepalived.conf
         dest: /etc/keepalived/keepalived.conf
+      vars: 
+        keepalived_state:  "{{ keepalived_master_state }}"
+        keepalived_priority: "{{ keepalived_priority_default }}"
+      when: inventory_hostname == "haproxy01"
       notify: Restart keepalived
+
+    - name: Create backup keepalived.conf
+      template:
+        src: ../templates/keepalived.conf
+        dest: /etc/keepalived/keepalived.conf
+      vars: 
+        keepalived_state:  "{{ keepalived_master_backup }}"
+        keepalived_priority: "{{ 200 - ansible_play_hosts.index(item) | int }}"
+      loop: "{{ ansible_play_hosts_all }}"
+      loop_control:
+        loop_var: item
+      when: inventory_hostname != "haproxy01"
 
   handlers:
     - name: Restart keepalived
