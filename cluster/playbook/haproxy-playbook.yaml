@@ -30,11 +30,32 @@
         state: present
         update_cache: yes
 
-    - name: Create keepalived.conf
+    - name: Create master keepalived.conf
       template:
         src: ../templates/keepalived.conf
         dest: /etc/keepalived/keepalived.conf
+      vars: 
+        keepalived_state:  "{{ keepalived_master_state }}"
+        keepalived_priority: "{{ keepalived_priority_default }}"
+      when: inventory_hostname == haproxy_master_name
       notify: Restart keepalived
+
+    - name: Create backup keepalived.conf
+      template:
+        src: ../templates/keepalived.conf
+        dest: /etc/keepalived/keepalived.conf
+      vars:
+        keepalived_state: "{{ keepalived_backup_state }}"
+        keepalived_priority: "{{ keepalived_priority_default - ansible_play_hosts_all.index(inventory_hostname) * 66 }}"
+      when: inventory_hostname != haproxy_master_name
+      notify: Restart keepalived
+
+    - name: Restart keepalived
+      systemd:
+        name: keepalived
+        state: restarted
+        enabled: yes
+        daemon-reload: yes
 
   handlers:
     - name: Restart keepalived

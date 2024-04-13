@@ -60,6 +60,17 @@
   - name: Deploy CNI flannel
     shell: "kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/{{ ansible_user }}/kube-flannel-v{{ flannel_version }}.yml"
 
+  - name: Copy dns-horizontal-autoscaler.yml
+    copy:
+      src: "../dns-horizontal-autoscaler.yml"
+      dest: "/home/{{ ansible_user }}/dns-horizontal-autoscaler.yml"
+      owner: "{{ ansible_user }}"
+      group: "{{ ansible_user }}"
+      mode: 0755
+
+  - name: Deploy CNI flannel
+    shell: "kubectl --kubeconfig=/etc/kubernetes/admin.conf apply -f /home/{{ ansible_user }}/dns-horizontal-autoscaler.yml"
+
   - name: Restart kubelet service
     service:
       name: kubelet
