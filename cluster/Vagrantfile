@@ -1,6 +1,6 @@
 NUM_MASTER_NODE = 2 # add standby master - recommend 3, 5, 7 master_node
 NUM_WORKER_NODE = 2
-NUM_PROXY_NODE = 3
+NUM_PROXY_NODE = 2
 
 IP_NW = "192.168.56."
 MASTER_IP_START = 10
