@@ -15,6 +15,16 @@
         src: ../templates/haproxy.cfg
         dest: /etc/haproxy/haproxy.cfg
 
+    - name: create haproxy ssl
+      file:
+        state: directory
+        dest: /etc/haproxy/ssl
+
+    - name: Configure haproxy ssl
+      template:
+        src: ../sign-yourself/duongdx.pem
+        dest: /etc/haproxy/ssl/duongdx.pem
+
     - name: Restart haproxy
       systemd:
         name: haproxy

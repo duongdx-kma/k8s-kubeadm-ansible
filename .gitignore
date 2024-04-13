@@ -3,6 +3,7 @@
 *.pem.*
 *.crt
 *.csr
+*.srl
 .idea
 *.vagrant
 *.log
