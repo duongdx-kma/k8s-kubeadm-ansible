@@ -11,6 +11,7 @@ master01: 192.168.56.11
 master02: 192.168.56.12
 node01: 192.168.56.16
 node02: 192.168.56.17
+haproxy_master_name: haproxy01
 http_node_port: 30098
 https_node_port: 30443
 
@@ -19,7 +20,7 @@ interface: enp0s8
 # haproxy endpoint. this VIP: virtual IP
 control_plane_lb_endpoint: 192.168.56.167
 keepalived_master_state: MASTER
-keepalived_master_backup: BACKUP
+keepalived_backup_state: BACKUP
 keepalived_priority_default: 200
 
 # nfs variables:
