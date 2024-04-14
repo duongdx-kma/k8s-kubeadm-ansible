@@ -177,15 +177,6 @@
     notify: Restart nfs-common
   #End: install nfs-common:
 
-  #Start: install open-iscsi:
-  - name: install open-iscsi
-    apt:
-      name: open-iscsi
-      state: present
-      update_cache: yes
-    notify: Restart open-iscsi
-  #End: install nfs-common:
-
   handlers:
   - name: Restart containerd
     service:
@@ -195,10 +186,4 @@
   - name: Restart nfs-common
     service:
       name: containerd
-      state: restarted
-
-
-  - name: Restart open-iscsi
-    service:
-      name: open-iscsi
       state: restarted

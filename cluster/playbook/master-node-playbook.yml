@@ -129,6 +129,7 @@
       regexp: 'KUBELET_EXTRA_ARGS='
       insertafter: '\[Service\]'
       state: present
+    notify: restart kubelet
 
   handlers:
   - name: restart kubelet
