@@ -38,10 +38,13 @@ spec:
             {{- toYaml $root.Values.securityContext | nindent 12 }}
           image: "{{ $value.image }}:{{ $value.tag | default $root.Chart.AppVersion }}"
           imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+
+          #container port
+          {{- with $value.ports  }}
           ports:
-            - name: http
-              containerPort: {{ $value.port }}
-              protocol: TCP
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+
           #config pod resources
           {{- with get $root.Values.resources $key  }}
           resources:
@@ -60,6 +63,10 @@ spec:
             {{- toYaml . | nindent 12 }}
           {{- end }}
 
+        # sidecar container
+        {{- with get $root.Values.sideCarContainer $key }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
 
       # define init container
       {{- with get $root.Values.initContainers $key }}

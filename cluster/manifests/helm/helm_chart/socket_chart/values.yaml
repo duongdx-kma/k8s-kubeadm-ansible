@@ -10,7 +10,13 @@ image:
       name: golang backend websocket
       image: duong1200798/golang_backend
       tag: v1
-      port: 8088
+      ports:
+        - name: backend
+          containerPort: 8088
+      servicePort:
+        - name: backend
+          port: 8088
+          targetPort: 8088
       labels:
         run: backend
         app: backend
@@ -20,7 +26,13 @@ image:
       name: react frontend websocket
       image: duong1200798/socket_app_react
       tag: v1
-      port: 80
+      ports:
+        - name: frontend
+          containerPort: 80
+      servicePort:
+        - name: frontend
+          port: 80
+          targetPort: 80
       labels:
         run: frontend
         app: frontend
@@ -30,25 +42,127 @@ image:
       name: mysql websocket
       image: duong1200798/socket_app_mysql
       tag: v1
-      port: 3306
+      ports:
+        - name: database
+          containerPort: 3306
+      servicePort:
+        - name: database
+          port: 3306
+          targetPort: 3306
       labels:
         run: database
         app: database
       serviceType: ClusterIP
+    #---
+    logstash:
+      name: logstash
+      image: logstash
+      tag: 7.16.3
+      ports:
+        - name: logstash
+          containerPort: 5044
+      servicePort:
+        - name: logstash
+          port: 5044
+          targetPort: 5044
+      labels:
+        run: logstash
+        app: logstash
+      serviceType: ClusterIP
+    #---
+    elasticsearch:
+      name: elasticsearch
+      image: elasticsearch
+      tag: 7.16.3
+      ports:
+        - name: client
+          containerPort: 9200
+        - name: nodes
+          containerPort: 9300
+      servicePort:
+        - name: client
+          port: 9200
+          targetPort: 9200
+        - name: nodes
+          port: 9300
+          targetPort: 9300
+      labels:
+        run: elasticsearch
+        app: elasticsearch
+      serviceType: ClusterIP
+    #---
+    kibana:
+      name: kibana
+      image: kibana
+      tag: 7.16.3
+      ports:
+        - name: kibana-port
+          containerPort: 5601
+      servicePort:
+        - name: kibana-port
+          port: 5601
+          targetPort: 5601
+      labels:
+        run: kibana
+        app: kibana
+      serviceType: ClusterIP
+
+sideCarContainer:
+  backend:
+    - name: filebeat
+      image: elastic/filebeat:7.16.3
+      args:
+        - -c
+        - /etc/filebeat/conf.yaml
+        - -e
+      volumeMounts:
+        - name: filebeat-config
+          mountPath: /etc/filebeat
+        - name: log
+          mountPath: /var/log
+  frontend:
+    - name: filebeat
+      image: elastic/filebeat:7.16.3
+      args:
+        - -c
+        - /etc/filebeat/conf.yaml
+        - -e
+      volumeMounts:
+        - name: filebeat-config
+          mountPath: /etc/filebeat
+        - name: log
+          mountPath: /var/log
+  database:
+    - name: filebeat
+      image: elastic/filebeat:7.16.3
+      args:
+        - -c
+        - /etc/filebeat/conf.yaml
+        - -e
+      volumeMounts:
+        - name: filebeat-config
+          mountPath: /etc/filebeat
+        - name: log
+          mountPath: /var/log
+  elasticsearch: []
+  kibana: []
+  logstash: []
 
 # Additional ingress on the output Deployment definition.
 ingress:
   backend:
     name: socket-ingress-api
     className: nginx
-    paths:
-      - path: /api(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: backend
-            port:
-              number: 8088
+    rules:
+      - http:
+          paths:
+            - path: /api(/|$)(.*)
+              pathType: ImplementationSpecific
+              backend:
+                service:
+                  name: backend
+                  port:
+                    number: 8088
     annotations:
       nginx.ingress.kubernetes.io/rewrite-target: /$2
       nginx.ingress.kubernetes.io/use-regex: "true"
@@ -57,14 +171,48 @@ ingress:
   frontend:
     name: socket-ingress
     className: nginx
-    paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend
-            port:
-              number: 80
+    rules:
+      - http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: frontend
+                  port:
+                    number: 80
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  # ---
+  elasticsearch:
+    name: elasticsearch-ingress
+    className: nginx
+    rules:
+      - host: elasticsearch.duongdx.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: elasticsearch
+                  port:
+                    number: 9200
+  # ---
+  kibana:
+    name: kibana-ingress
+    className: nginx
+    rules:
+      - host: kibana.duongdx.com
+        http:
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: kibana
+                  port:
+                    number: 5601
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
@@ -82,9 +230,56 @@ configMaps:
   frontend:
     name: front-configmap
     data:
-      api-url: http://192.168.56.16:30098/api #need a endpoint, which client browser can access
-      websocket-url: ws://192.168.56.16:30098/api/ws #need a endpoint, which client browser can access
-
+      api-url: https://duongdx.com/api #need a endpoint, which client browser can access
+      websocket-url: wss://duongdx.com/api/ws #need a endpoint, which client browser can access
+  #---
+  filebeat-config:
+    name: filebeat-config
+    data:
+      conf.yaml: |
+        filebeat.inputs:
+        - type: log
+          paths:
+            - '/var/log/*.log'
+          tags: ["my_app"]
+        output:
+          logstash:
+            hosts: [ "logstash:5044" ]
+  #---
+  logstash:
+    name: logstash
+    data:
+      access-log.conf: |
+        input {
+          beats {
+            port => "5044"
+          }
+        }
+        filter {
+            grok {
+                add_field => [ "received_at", "%{@timestamp}" ]
+            }
+        }
+        output {
+          if "my_open_source" in [tags] {
+             elasticsearch {
+               hosts => [ "elasticsearch-master:9200" ]
+               index => "logstash_my_open_source_%{+YYYY.MM.dd}"
+               }
+             }
+          else if "my_app" in [tags] {
+             elasticsearch {
+               hosts => [ "elasticsearch-master:9200" ]
+               index => "logstash_my_app_%{+YYYY.MM.dd}"
+               }
+             }
+          else {
+             elasticsearch {
+               hosts => [ "elasticsearch-master:9200" ]
+               index => "logstash_default_%{+YYYY.MM.dd}"
+               }
+          }
+        }
 # Additional secret on the output Deployment definition.
 secret:
   name: database-secret
@@ -109,6 +304,9 @@ replication:
     backend: 2
     frontend: 2
     database: 1
+    logstash: 1
+    elasticsearch: 1
+    kibana: 1
 
 podSecurityContext: {}
   # fsGroup: 2000
@@ -199,24 +397,57 @@ environmentVarialbes:
         secretKeyRef:
           name: database-secret
           key: db-database
-
+  #---
+  elasticsearch:
+    - name: JAVA_TOOL_OPTIONS
+      value: -Xmx256m -Xms256m
+    - name: discovery.type
+      value: single-node
 
 # Additional volumes on the output Deployment definition.
 volumes:
-  backend: [ ]
-  frontend: [ ]
+  backend:
+    - name: log
+      emptyDir: { }
+    - name: filebeat-config
+      configMap:
+        name: filebeat-config
+  frontend:
+    - name: log
+      emptyDir: { }
+    - name: filebeat-config
+      configMap:
+        name: filebeat-config
   database:
+    - name: log
+      emptyDir: { }
+    - name: filebeat-config
+      configMap:
+        name: filebeat-config
     - name: persistent-volume
       persistentVolumeClaim:
         claimName: database-pvc
+  logstash:
+    - name: logstash-config
+      configMap:
+        name: logstash
 
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts:
-  backend: []
-  frontend: []
+  backend:
+    - name: log
+      mountPath: /var/log
+  frontend:
+    - name: log
+      mountPath: /var/log/nginx
   database:
+    - name: log
+      mountPath: /var/log/mysql
     - name: persistent-volume
       mountPath: "/var/lib/mysql"
+  logstash:
+    - name: logstash-config
+      mountPath: /usr/share/logstash/pipeline
 
 
 # Addition initContainers on the output Deployment definition
@@ -247,6 +478,14 @@ resources:
   frontend: {}
   # database resources
   database: {}
+  # elasticsearch resources
+  elasticsearch:
+    requests:
+      memory: 500Mi
+      cpu: 0.5
+    limits:
+      memory: 500Mi
+      cpu: 0.5
 
 nodeSelector: {}
 

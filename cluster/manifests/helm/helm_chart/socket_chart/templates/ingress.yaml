@@ -10,11 +10,9 @@ metadata:
   name: {{ $value.name }}
 spec:
   ingressClassName: {{ $value.className }}
+  {{- with $value.rules }}
   rules:
-  - http:
-      {{- with $value.paths }}
-      paths:
-      {{- toYaml . | nindent 8 }}
-      {{- end }}
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
 ---
 {{- end }}

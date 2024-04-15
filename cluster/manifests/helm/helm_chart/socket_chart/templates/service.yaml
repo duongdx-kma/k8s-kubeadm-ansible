@@ -10,10 +10,10 @@ metadata:
   {{- end }}
 spec:
   type: {{ $value.serviceType }}
+  {{- with $value.servicePort }}
   ports:
-    - port: {{ $value.port }}
-      targetPort: {{ $value.port }}
-      protocol: TCP
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- with $value.labels }}
   selector:
   {{- toYaml . | nindent 4 }}
