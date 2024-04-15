@@ -1,0 +1,163 @@
+- name: install jenkins
+  hosts: jenkins_server
+  vars_files:
+    - vars.yaml
+  tasks:
+    # Start: install container runtime
+    - name: Uninstall old versions
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - docker-compose-v2
+          - docker-doc
+          - podman-docker
+        state: absent
+
+    - name: Install prerequisite for container run time
+      apt:
+        name:
+          - curl
+          - vim
+          - gpg
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+        state: present
+        update_cache: yes # this option is the same 'apt-get update'
+
+    - name: make directory for saving key
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: 0755
+
+    - name: Add Docker GPG apt Key
+      ansible.builtin.apt_key:
+        keyring: "/etc/apt/keyrings/docker.gpg"
+        url: "https://download.docker.com/linux/{{ os_version }}/gpg"
+
+    - name: Add Docker Repository
+      lineinfile:
+        path: "/etc/apt/sources.list.d/docker.list"
+        line: "deb [arch={{ architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        {{ docker_version_code_name }} stable"
+        create: yes
+
+    # kubernetes only need container.io as container runtime
+    - name: Update apt and install docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+        state: present
+        update_cache: true
+
+    - name: enabled && restart docker
+      service:
+        name: docker
+        state: restarted
+        enabled: true
+
+    # config prerequisite for jenkins
+    - name: install fontconfig openjdk-17-jre
+      apt:
+        name:
+          - fontconfig
+          - openjdk-17-jre
+        state: present
+        update_cache: yes
+
+    # install jenkins
+    - name: download gpg key
+      ansible.builtin.apt_key:
+        keyring: "/usr/share/keyrings/jenkins-keyring.gpg"
+        url: "https://pkg.jenkins.io/debian-stable/jenkins.io-{{ jenkins_year }}.key"
+        state: present
+
+    - name: Add jenkins APT repository to sources.list
+      ansible.builtin.copy:
+        content: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/"
+        dest: "/etc/apt/sources.list.d/jenkins.list"
+
+    - name: install jenkins
+      apt:
+        name: jenkins
+        state: present
+        update_cache: true
+
+    - name: start jenkins
+      service:
+        name: jenkins
+        state: started
+        enabled: true
+
+    - name: adding existing user '{{ ansible_user }}' to group docker
+      user:
+        name: '{{ ansible_user }}'
+        groups: docker
+        append: yes
+
+    - name: adding jenkins user to group docker
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    # config nginx as revert proxy for jenkins
+    - name: install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: passing nginx confi
+      template:
+        src: ../templates/jenkins-nginx.conf
+        dest: /etc/nginx/sites-available/jenkins.duongdx.com
+
+    - name: make soft link for nginx config
+      file:
+        src: /etc/nginx/sites-available/jenkins.duongdx.com
+        dest: /etc/nginx/sites-enabled/jenkins.duongdx.com
+        state: link
+        force: yes
+
+    - name: restart and enabled nginx
+      service:
+        name: nginx
+        state: restarted
+        enabled: true
+
+#    # config ssl/tls
+#    - name: install pip
+#      apt:
+#        name: python3-pip
+#        state: present
+#        update_cache: true
+#    - name: Upgrade pip
+#      pip:
+#        name: pip
+#        state: latest
+#
+#    - name: Install Certbot (via pip)
+#      pip:
+#        name: certbot
+#        state: present
+#
+#    - name: Obtain SSL certificate
+#      shell: sudo certbot --nginx -d jenkins.duongdx.com
+#      notify:
+#        - Reload Nginx
+#
+#  handlers:
+#    - name: Reload Nginx
+#      service:
+#        name: nginx
+#        state: reloaded
+
+# run for docker-agent:
+# create network: docker network create jenkins
+# docker run --name docker-agent -d --restart=always -p 127.0.0.1:2376:2375 --network jenkins -v /var/run/docker.sock:/var/run/docker.sock alpine/socat tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
