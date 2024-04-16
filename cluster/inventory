@@ -14,8 +14,10 @@ all:
       ansible_host: 192.168.56.31
     haproxy02:
       ansible_host: 192.168.56.32
-    jenkins:
+    jenkins_master:
       ansible_host: 192.168.56.98
+    jenkins_agent:
+      ansible_host: 192.168.56.22
 
   children:
     master_node:
@@ -47,7 +49,8 @@ all:
 
     jenkins_server:
       hosts:
-        jenkins:
+        jenkins_master:
+        jenkins_agent:
 
     mix_group:
       children:

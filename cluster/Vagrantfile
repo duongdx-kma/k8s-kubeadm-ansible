@@ -35,6 +35,18 @@ Vagrant.configure("2") do |config|
       node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
   end
 
+  config.vm.define "jenkins-agent" do |node|
+      node.vm.provider "virtualbox" do |vb|
+        vb.name = "jenkins-agent"
+        vb.memory = 2048
+        vb.cpus = 2
+      end
+      node.vm.hostname = "jenkins-agent"
+      node.vm.network :private_network, ip: "192.168.56.22"
+      node.vm.network "forwarded_port", guest: 22, host: 61102
+      node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
+  end
+
   (1..NUM_PROXY_NODE).each do |i|
     config.vm.define "haproxy0#{i}" do |node|
       node.vm.provider "virtualbox" do |vb|

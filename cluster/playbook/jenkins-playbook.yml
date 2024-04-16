@@ -1,4 +1,4 @@
-- name: install jenkins
+- name: install prerequisite jenkins
   hosts: jenkins_server
   vars_files:
     - vars.yaml
@@ -70,7 +70,17 @@
         state: present
         update_cache: yes
 
-    # install jenkins
+########################################################################3
+# install jenkins
+# run for docker-agent:
+# create network: docker network create jenkins
+# docker run --name docker-agent -d --restart=always -p 127.0.0.1:2376:2375 --network jenkins -v /var/run/docker.sock:/var/run/docker.sock alpine/socat tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+########################################################################
+- name: config master jenkins
+  hosts: jenkins_master
+  vars_files:
+    - vars.yaml
+  tasks:
     - name: download gpg key
       ansible.builtin.apt_key:
         keyring: "/usr/share/keyrings/jenkins-keyring.gpg"
@@ -131,6 +141,22 @@
         state: restarted
         enabled: true
 
+    - name: create ssh folder for jenkins
+      file:
+        path: /var/lib/jenkins/.ssh
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: 0700
+
+    - name: passing private key
+      copy:
+        src: ../client.pem
+        dest: /var/lib/jenkins/.ssh/id_rsa
+        owner: jenkins
+        group: jenkins
+        mode: 0400
+
 #    # config ssl/tls
 #    - name: install pip
 #      apt:
@@ -158,6 +184,34 @@
 #        name: nginx
 #        state: reloaded
 
-# run for docker-agent:
-# create network: docker network create jenkins
-# docker run --name docker-agent -d --restart=always -p 127.0.0.1:2376:2375 --network jenkins -v /var/run/docker.sock:/var/run/docker.sock alpine/socat tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+- name: config jenkins agent
+  hosts: jenkins_agent
+  vars_files:
+    - vars.yaml
+  tasks:
+    - name: create group jenkins for agent
+      group:
+        name: jenkins
+        state: present
+
+    - name: create user jenkins
+      user:
+        name: jenkins
+        state: present
+        groups: "jenkins, docker"
+
+    - name: create ssh folder for jenkins
+      file:
+        path: /home/jenkins/.ssh
+        state: directory
+        owner: jenkins
+        group: jenkins
+        mode: 0700
+
+    - name: passing public key
+      copy:
+        src: ../client.pem.pub
+        dest: /home/jenkins/.ssh/authorized_keys
+        owner: jenkins
+        group: jenkins
+        mode: 0600
