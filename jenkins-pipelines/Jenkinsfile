@@ -9,33 +9,10 @@ pipeline {
         NODE_IMAGE = 'node:16-alpine' // Node.js Docker image to use
         REACT_APP_NAME = 'react-socket'
     }
-    triggers {
-        githubPullRequest {
-            useGitHubHooks()
-            orgWhitelist('privateorg')
-            allowMembersOfWhitelistedOrgsAsAdmin()
-            extensions {
-                commitStatus {
-                    context('Jenkins')
-                    completedStatus('SUCCESS', 'Build succeeded!')
-                    completedStatus('FAILURE', 'Build failed. ')
-                    completedStatus('ERROR', 'Build errored. This is probably a problem with Jenkins or related infrastructure and not an issue with your code changes.')
-                }
-            }
-        }
-    }
     stages {
         stage("Cleanup Workspace") {
             steps {
                 cleanWs()
-            }
-        }
-
-        stage('fetching code') {
-            steps {
-                // Checkout your source code repository
-                // git branch: 'master', credentialsId: GITHUB_CREDENTIALS_ID, url: 'https://github.com/duongdx-kma/react-socket'
-                git credentialsId: GITHUB_CREDENTIALS_ID, url: 'https://github.com/duongdx-kma/react-socket'
             }
         }
         // deploy instructions
@@ -53,7 +30,8 @@ pipeline {
                     docker.image(NODE_IMAGE).inside('-v /var/run/docker.sock:/var/run/docker.sock') {
                         sh "cd ${REACT_APP_NAME}"
                         sh 'npm install'
-                        sh 'npm test'
+                        sh 'npm run test'
+                        sh 'npm run build'
                     }
                 }
             }
