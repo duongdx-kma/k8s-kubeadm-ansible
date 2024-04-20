@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  jenkins:
+    container_name: jenkins
+    image: jenkins/jenkins:2.440.3-lts-jdk17
+    networks:
+      - jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - "jenkins_home:/var/jenkins_home"
+      - /var/run/docker.sock:/var/run/docker.sock
+  
+  nginx:
+    container_name: nginx
+    image: nginx:alpine
+    networks:
+      - jenkins
+    ports:
+      - "80:80"
+    working_dir: /usr/share/nginx/html
+    depends_on:
+      - jenkins
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+  
+  agent:
+    restart: always
+    container_name: jenkins-agent
+    image: alpine/socat
+    command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+    networks: 
+      - jenkins
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "2376:2375"
+
+  db_host:
+    container_name: database
+    image: mysql:5.7
+    networks:
+      - jenkins
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+    volumes:
+      - mysql_volume:/var/lib/mysql
+
+
+networks:
+  jenkins:
+    name: jenkins
+volumes:
+  jenkins_home: {}
+  mysql_volume: {}
