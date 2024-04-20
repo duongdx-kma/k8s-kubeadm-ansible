@@ -111,7 +111,27 @@
         mode: 0600
 
 #####
+# config start gitlab runner:
 # docker run -d --name gitlab-runner --restart always \
 #  -v /var/run/docker.sock:/var/run/docker.sock \
 #  -v /srv/gitlab-runner/config:/etc/gitlab-runner \
-#  gitlab/gitlab-runner:latest
+#  gitlab/gitlab-runner:alpine
+
+# register gitlab with gitlab runner with authencicate token:
+# docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
+#   --non-interactive \
+#   --url "https://gitlab.com/" \
+#   --token "glrt-N79YHeXJ-VP1Tg1-soTQ" \
+#   --executor "docker" \
+#   --docker-image public.ecr.aws/docker/library/node:18-alpine \
+#   --name "xuanduong_react_socket"
+
+ docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
+   --non-interactive \
+   --url "https://gitlab.com/" \
+   --token "glrt-N79YHeXJ-VP1Tg1-soTQ" \
+   --executor "docker" \
+   --docker-image public.ecr.aws/docker/library/node:18-alpine \
+   --name "xuanduong_react_socket"
+
+# gitlab-runner register  --url https://gitlab.com  --token glrt-N79YHeXJ-VP1Tg1-soTQ
