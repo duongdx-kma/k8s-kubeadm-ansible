@@ -120,18 +120,21 @@
 # register gitlab with gitlab runner with authencicate token:
 # docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
 #   --non-interactive \
+#   --env "RUNNER_DOCKER_SERVICES_LIMIT=0" \
 #   --url "https://gitlab.com/" \
-#   --token "glrt-N79YHeXJ-VP1Tg1-soTQ" \
+#   --token "glrt-ViZmt3v9qzKoLEmHLUfv" \
 #   --executor "docker" \
 #   --docker-image public.ecr.aws/docker/library/node:18-alpine \
 #   --name "xuanduong_react_socket"
 
- docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
-   --non-interactive \
-   --url "https://gitlab.com/" \
-   --token "glrt-N79YHeXJ-VP1Tg1-soTQ" \
-   --executor "docker" \
-   --docker-image public.ecr.aws/docker/library/node:18-alpine \
-   --name "xuanduong_react_socket"
+# docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
+#   --non-interactive \
+#   --env "RUNNER_DOCKER_SERVICES_LIMIT=0" \
+#   --url "https://gitlab.com/" \
+#   --token "glrt-ceVKu8XDFqv5rsgk55ch" \
+#   --executor "docker" \
+#   --docker-image docker \
+#   --docker-privileged \
+#   --name "xuanduong_react_socket_docker_in_docker"
 
 # gitlab-runner register  --url https://gitlab.com  --token glrt-N79YHeXJ-VP1Tg1-soTQ
