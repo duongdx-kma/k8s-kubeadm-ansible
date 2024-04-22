@@ -41,7 +41,7 @@
       lineinfile:
         path: "/etc/apt/sources.list.d/docker.list"
         line: "deb [arch={{ architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-        {{ docker_version_code_name }} stable"
+          {{ docker_version_code_name }} stable"
         create: yes
 
     # kubernetes only need container.io as container runtime
