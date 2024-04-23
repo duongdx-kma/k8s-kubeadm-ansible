@@ -122,7 +122,7 @@
 #   --non-interactive \
 #   --env "RUNNER_DOCKER_SERVICES_LIMIT=0" \
 #   --url "https://gitlab.com/" \
-#   --token "glrt-ViZmt3v9qzKoLEmHLUfv" \
+#   --token "xxxxxxxxxxxxxxxxxxxxxx" \
 #   --executor "docker" \
 #   --docker-image public.ecr.aws/docker/library/node:18-alpine \
 #   --name "xuanduong_react_socket"
@@ -131,10 +131,15 @@
 #   --non-interactive \
 #   --env "RUNNER_DOCKER_SERVICES_LIMIT=0" \
 #   --url "https://gitlab.com/" \
-#   --token "glrt-ceVKu8XDFqv5rsgk55ch" \
+#   --token "xxxxxxxxxxxxxxxxx" \
 #   --executor "docker" \
 #   --docker-image docker \
 #   --docker-privileged \
-#   --name "xuanduong_react_socket_docker_in_docker"
-
-# gitlab-runner register  --url https://gitlab.com  --token glrt-N79YHeXJ-VP1Tg1-soTQ
+#   --name "xuanduong_docker_in_docker" \
+#   --cache-typ "s3" \
+#   --cache-shared "true" \
+#   --cache-s3-server-address "http://minio:9000" \
+#   --cache-s3-access-key "zXqw0b6fyihpEtXVonhM" \
+#   --cache-s3-secret-key "k2VTiEWLanukywyDXb3P2jutFy4otnu2CtgLPkR0" \
+#   --cache-s3-bucket-name "gitlab-runner-cache" \
+#   --cache-s3-insecure "true"

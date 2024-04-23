@@ -33,6 +33,7 @@ Vagrant.configure("2") do |config|
         vb.cpus = 3
       end
       node.vm.hostname = "runner0#{i}"
+      node.vm.synced_folder "../gitlab-ci", "/tmp/gitlab-ci", :mount_options => ["dmode=777", "fmode=666"]
       node.vm.network :private_network, ip: IP_NW + "#{RUNNER_IP_START + i}"
       node.vm.network "forwarded_port", guest: 22, host: "#{2210 + i}"
       node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
