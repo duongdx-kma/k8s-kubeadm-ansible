@@ -44,7 +44,6 @@
           {{ docker_version_code_name }} stable"
         create: yes
 
-    # kubernetes only need container.io as container runtime
     - name: Update apt and install docker
       apt:
         name:
