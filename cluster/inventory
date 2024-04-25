@@ -16,6 +16,10 @@ all:
       ansible_host: 192.168.56.32
     runner01:
       ansible_host: 192.168.56.98
+    docker01:
+      ansible_host: 192.168.56.61
+    docker02:
+      ansible_host: 192.168.56.62
 
   children:
     master_node:
@@ -48,6 +52,8 @@ all:
     runners:
       hosts:
         runner01:
+        docker01:
+        docker02:
 
     mix_group:
       children:
