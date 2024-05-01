@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  generation: 14
+  name: testing-argocd
+  namespace: argocd
+spec:
+  description: testing-argocd description
+
+  sourceRepos:
+  - '*'
+
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  
+---
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: web-ui-application
+  namespace: argocd
+spec:
+  destination:
+    namespace: web-ui
+    server: https://kubernetes.default.svc
+  project: testing-argocd
+  source:
+    path: web-ui
+    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    

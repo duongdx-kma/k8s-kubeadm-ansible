@@ -20,7 +20,7 @@ image:
       name: react frontend websocket
       image: duong1200798/socket_app_react
       tag: v1
-      port: 80
+      port: 8080
       labels:
         run: frontend
         app: frontend
@@ -64,7 +64,7 @@ ingress:
           service:
             name: frontend
             port:
-              number: 80
+              number: 8080
     annotations:
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
 

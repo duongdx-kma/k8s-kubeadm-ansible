@@ -1,0 +1,14 @@
+resources:
+  - ../../base
+
+namespace: dev
+
+patches:
+  - path: ./replicas.yaml
+  - path: ./service.yaml
+
+configMapGenerator:
+  - name: kustomize-configmap
+    files: 
+      - index.html
+    namespace: dev

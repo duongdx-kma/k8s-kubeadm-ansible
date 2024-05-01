@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: web-ui-application
+  namespace: argocd
+spec:
+  destination:
+    namespace: web-ui
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: web-ui
+    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: main
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    

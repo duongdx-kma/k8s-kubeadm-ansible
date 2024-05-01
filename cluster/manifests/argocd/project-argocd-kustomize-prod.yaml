@@ -1,0 +1,54 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: kustomize-prod-project
+  namespace: argocd
+spec:
+  description: this  project only supports duongdx-kustomize product
+
+  sourceRepos:
+  - https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+
+  destinations:
+  - namespace: kustomize-prod
+    server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+
+  roles:
+  - name: cd-role
+    description: sync privileges for kustomize-prod-project
+    policies:
+    - p, proj:kustomize-prod-project:cd-role, applications, sync, kustomize-prod-project/*, allow 
+    - p, proj:kustomize-prod-project:cd-role, applications, get, kustomize-prod-project/*, allow
+
+---
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-app-prod
+  namespace: argocd
+spec:
+  destination:
+    namespace: kustomize-prod
+    server: https://kubernetes.default.svc
+  project: kustomize-prod-project
+  source:
+    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: main
+    path:  kustomize/overlays/prod
+    kustomize:
+      namePrefix: prod-
+      nameSuffix: -v1
+      namespace: kustomize-prod
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+---

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: directory-recursive
+  namespace: argocd
+spec:
+  destination:
+    namespace:  directory-recursive
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path:  directory-recursive
+    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: main
+    directory:
+      recurse: true
+    
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    
