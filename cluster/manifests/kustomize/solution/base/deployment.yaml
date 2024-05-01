@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mywebapp
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+    spec: # Pod spec
+      containers:
+      - name: mycontainer
+        image: "nginx:alpine"
+        ports:
+        - containerPort: 80
+          name: flask
+        volumeMounts:
+          - name: nginx-content
+            mountPath: /usr/share/nginx/html
+        resources:
+          requests:
+            memory: "16Mi" 
+            cpu: "50m"    # 500milliCPUs (1/2 CPU)
+          limits:
+            memory: "20Mi"
+            cpu: "50m"
+
+      volumes:
+        - name: nginx-content
+          configMap:
+            name: kustomize-configmap

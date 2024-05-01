@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-app-dev
+  namespace: argocd
+spec:
+  destination:
+    namespace: dev-namespace
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: main
+    path:  kustomize/overlays/dev
+    kustomize:
+      namePrefix: dev-
+      nameSuffix: -v1
+      namespace: dev-namespace
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-app-prod
+  namespace: argocd
+spec:
+  destination:
+    namespace: prod-namespace
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: main
+    path:  kustomize/overlays/prod
+    kustomize:
+      namePrefix: prod-
+      nameSuffix: -v1
+      namespace: prod-namespace
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true

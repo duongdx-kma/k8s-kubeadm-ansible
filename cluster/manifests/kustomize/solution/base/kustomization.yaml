@@ -1,0 +1,12 @@
+resources:
+ - deployment.yaml
+ - service.yaml
+
+commonLabels:
+  app: duongdx-webapp
+
+namePrefix:
+  kustomize-
+
+nameSuffix: 
+  -v1

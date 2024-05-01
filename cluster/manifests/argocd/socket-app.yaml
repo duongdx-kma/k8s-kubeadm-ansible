@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: socket-app-with-helm
+  namespace: argocd
+spec:
+  destination:
+    namespace: socket-namespace
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: socket_chart
+    repoURL: https://duongdx-kma.github.io/helm-repository/
+    targetRevision: 0.1.18
+    helm:
+      releaseName: socket-app
+      parameters:
+        - name: "configMaps.frontend.data.api-url"
+          value: https://duongdx.com/api
+        - name: "configMaps.frontend.data.websocket-url"
+          value: wss://duongdx.com/api/ws
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    
