@@ -1,0 +1,144 @@
+- name: install prerequisite gitlab runners
+  hosts: runners
+  vars_files:
+    - vars.yaml
+  tasks:
+    # Start: install container runtime
+    - name: Uninstall old versions
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - docker-compose-v2
+          - docker-doc
+          - podman-docker
+        state: absent
+
+    - name: Install prerequisite for container run time
+      apt:
+        name:
+          - curl
+          - vim
+          - gpg
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+        state: present
+        update_cache: yes # this option is the same 'apt-get update'
+
+    - name: make directory for saving key
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: 0755
+
+    - name: Add Docker GPG apt Key
+      ansible.builtin.apt_key:
+        keyring: "/etc/apt/keyrings/docker.gpg"
+        url: "https://download.docker.com/linux/{{ os_version }}/gpg"
+
+    - name: Add Docker Repository
+      lineinfile:
+        path: "/etc/apt/sources.list.d/docker.list"
+        line: "deb [arch={{ architecture }} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          {{ docker_version_code_name }} stable"
+        create: yes
+
+    - name: Update apt and install docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+        state: present
+        update_cache: true
+
+    - name: enabled && restart docker
+      service:
+        name: docker
+        state: restarted
+        enabled: true
+    
+    - name: adding existing user '{{ ansible_user }}' to group docker
+      user:
+        name: '{{ ansible_user }}'
+        groups: docker
+        append: yes
+
+    ################################################################
+    # create new user for at least privileged containers
+    ################################################################
+    - name: create group "executor" user for agent
+      group:
+        name: "executor"
+        state: present
+        gid: 1098
+
+    - name: create user "executor"
+      user:
+        name: executor
+        state: present
+        group: "executor"
+        create_home: true
+        uid: 1098
+        shell: /bin/sh
+        home: /home/executor
+        ssh_key_bits: 2048
+        ssh_key_file: .ssh/id_rsa
+
+    - name: adding existing user 'executor' to group docker
+      user:
+        name: executor
+        groups: docker
+        append: yes
+
+    - name: create ssh folder for "executor"
+      file:
+        path: /home/executor/.ssh
+        state: directory
+        owner: executor
+        group: executor
+        mode: 0700
+
+    - name: passing public key
+      copy:
+        src: ../client.pem.pub
+        dest: /home/executor/.ssh/authorized_keys
+        owner: executor
+        group: executor
+        mode: 0600
+
+#####
+# config start gitlab runner:
+# docker run -d --name gitlab-runner --restart always \
+#  -v /var/run/docker.sock:/var/run/docker.sock \
+#  -v /srv/gitlab-runner/config:/etc/gitlab-runner \
+#  gitlab/gitlab-runner:alpine
+
+# register gitlab with gitlab runner with authencicate token:
+# docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
+#   --non-interactive \
+#   --env "RUNNER_DOCKER_SERVICES_LIMIT=0" \
+#   --url "https://gitlab.com/" \
+#   --token "xxxxxxxxxxxxxxxxxxxxxx" \
+#   --executor "docker" \
+#   --docker-image public.ecr.aws/docker/library/node:18-alpine \
+#   --name "xuanduong_react_socket"
+
+# docker run --rm -v /srv/gitlab-runner/config:/etc/gitlab-runner gitlab/gitlab-runner:alpine register \
+#   --non-interactive \
+#   --env "RUNNER_DOCKER_SERVICES_LIMIT=0" \
+#   --url "https://gitlab.com/" \
+#   --token "xxxxxxxxxxxxxxxxx" \
+#   --executor "docker" \
+#   --docker-image docker \
+#   --docker-privileged \
+#   --name "xuanduong_docker_in_docker" \
+#   --cache-typ "s3" \
+#   --cache-shared "true" \
+#   --cache-s3-server-address "http://minio:9000" \
+#   --cache-s3-access-key "zXqw0b6fyihpEtXVonhM" \
+#   --cache-s3-secret-key "k2VTiEWLanukywyDXb3P2jutFy4otnu2CtgLPkR0" \
+#   --cache-s3-bucket-name "gitlab-runner-cache" \
+#   --cache-s3-insecure "true"
