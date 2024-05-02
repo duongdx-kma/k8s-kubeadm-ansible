@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: duongdx-private-repo
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  name: k8s-manifetst-private-repo
+  type: git
+  url: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
+  sshPrivateKey: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    ................
+    -----END OPENSSH PRIVATE KEY-----

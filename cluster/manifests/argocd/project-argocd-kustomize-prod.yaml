@@ -7,7 +7,7 @@ spec:
   description: this  project only supports duongdx-kustomize product
 
   sourceRepos:
-  - https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+  - git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
 
   destinations:
   - namespace: kustomize-prod
@@ -41,7 +41,7 @@ spec:
     server: https://kubernetes.default.svc
   project: kustomize-prod-project
   source:
-    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
     targetRevision: main
     path:  kustomize/overlays/prod
     kustomize:

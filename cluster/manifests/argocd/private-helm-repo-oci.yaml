@@ -1,0 +1,14 @@
+# https://www.youtube.com/watch?v=Hn4pgrySYRU&t=40s
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    argocd.argoproj.io/secret-type: repository
+  name: duongdx-private-helm-chart-oci
+stringData:
+  url: gitlab.io/xuanduong/testing
+  name: private-helm-chart-oci
+  type: helm
+  enableOCI: "true"
+  username: username
+  password: password
