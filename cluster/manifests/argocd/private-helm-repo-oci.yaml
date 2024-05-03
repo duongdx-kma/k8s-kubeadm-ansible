@@ -5,10 +5,59 @@ metadata:
   labels:
     argocd.argoproj.io/secret-type: repository
   name: duongdx-private-helm-chart-oci
+  namespace: argocd
 stringData:
-  url: gitlab.io/xuanduong/testing
+  url: registry.gitlab.com/xuanduong/duongdx-helm-repo
   name: private-helm-chart-oci
   type: helm
   enableOCI: "true"
   username: username
   password: password
+
+--- 
+
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: helm-private-oci
+  namespace: argocd
+spec:
+  description: helm project from gitlab private container registry
+  
+  sourceRepos:
+    - registry.gitlab.com/xuanduong/duongdx-helm-repo
+  
+  destinations:
+  - namespace: helm-private-oci-ns
+    server: https://kubernetes.default.svc
+
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+
+---
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-chart-application
+  namespace: argocd
+spec:
+  destination:
+    namespace: helm-private-oci-ns
+    server: https://kubernetes.default.svc
+  project: helm-private-oci
+  source:
+    repoURL: registry.gitlab.com/xuanduong/duongdx-helm-repo
+    targetRevision: "*"
+    chart:  nginx-chart
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      prune: true
+      selfHeal: true
