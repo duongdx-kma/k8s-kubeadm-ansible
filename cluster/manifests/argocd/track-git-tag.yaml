@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: track-git-tag
+  namespace: argocd
+spec:
+  destination:
+    namespace: track-git-tag
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: web-ui
+    repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
+    targetRevision: v1
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true # argocd.argoproj.io/sync-options: ApplyOutOfSyncOnly=true
+    # automated:
+    #   prune: true # argocd.argoproj.io/sync-options: Prune=true
+    #   selfHeal: true

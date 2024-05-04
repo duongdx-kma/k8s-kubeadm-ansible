@@ -22,4 +22,10 @@ spec:
   syncPolicy:
     syncOptions:
     - CreateNamespace=true
-    
+  ignoreDifferences:
+  - group: '*'
+    kind: '*'
+    jsonPointers:
+      # If you have a slash / in your pointer path, you can use the ~1 character. For example
+      # - /metadata/labels/app.kubernetes.io/instance
+      - /metadata/labels/app.kubernetes.io~1instance
