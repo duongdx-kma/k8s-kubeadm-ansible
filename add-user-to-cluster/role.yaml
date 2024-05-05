@@ -4,6 +4,15 @@ kind: Role
 metadata:
   name: argocd-all-access
 rules:
-  - apiGroups: ["", "apps", "batch", "networking.k8s.io"]
+  - apiGroups: 
+    # - ""
+    # - "apps"
+    # - "batch"
+    # - "networking.k8s.io"
+    - "*"
     resources: ["*"]
     verbs: ["*"]
+
+  # - nonResourceURLs: ["*"]
+  #   resources: []
+  #   verbs: ["*"]

@@ -8,15 +8,14 @@ metadata:
   name: cluster-access
 rules: 
 - apiGroups:
-    - ""
-    - "apps"
-    - "batch"
-    - "networking.k8s.io"
-    - "storage.k8s.io"
-    - "autoscaling"
-    - roles.rbac.authorization.k8s.io 
-    - clusterroles.rbac.authorization.k8s.io
-    - rbac.authorization.k8s.io
+    # - ""
+    # - "apps"
+    # - "batch"
+    # - "networking.k8s.io"
+    # - "storage.k8s.io"
+    # - "autoscaling"
+    # - rbac.authorization.k8s.io
+    - "*"
   resources: 
     # - pods
     # - services
@@ -26,5 +25,13 @@ rules:
     # - storageclasses
     # - persistentvolumes
     # - serviceaccounts
+    # - roles
+    # - rolebindings
+    # - clusterroles
+    # - clusterrolebindings
     - '*'
-  verbs: ["get", "watch", "list", "create", "delete"]
+  # verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
+  verbs: ["*"]
+
+- nonResourceURLs: ["*"]
+  verbs: ["*"]
