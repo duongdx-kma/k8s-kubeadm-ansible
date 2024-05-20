@@ -1,0 +1,37 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: cluster-access
+rules: 
+- apiGroups:
+    # - ""
+    # - "apps"
+    # - "batch"
+    # - "networking.k8s.io"
+    # - "storage.k8s.io"
+    # - "autoscaling"
+    # - rbac.authorization.k8s.io
+    - "*"
+  resources: 
+    # - pods
+    # - services
+    # - namespaces
+    # - deployments
+    # - jobs
+    # - storageclasses
+    # - persistentvolumes
+    # - serviceaccounts
+    # - roles
+    # - rolebindings
+    # - clusterroles
+    # - clusterrolebindings
+    - '*'
+  # verbs: ["get", "watch", "list", "create", "delete", "patch", "update"]
+  verbs: ["*"]
+
+- nonResourceURLs: ["*"]
+  verbs: ["*"]

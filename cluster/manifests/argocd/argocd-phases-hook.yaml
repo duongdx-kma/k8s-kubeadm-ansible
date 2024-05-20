@@ -1,21 +1,23 @@
+--- 
+#### application testing:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: web-ui-application
+  name: sync-phases
   namespace: argocd
 spec:
   destination:
-    namespace: web-ui
+    namespace: sync-phases
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: web-ui
+    path: argocd-phases
     repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
     targetRevision: main
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
       - ApplyOutOfSyncOnly=true # argocd.argoproj.io/sync-options: ApplyOutOfSyncOnly=true
-    automated:
-      prune: true # argocd.argoproj.io/sync-options: Prune=true
-      selfHeal: true
+    # automated:
+    #   prune: true # argocd.argoproj.io/sync-options: Prune=true
+    #   selfHeal: true

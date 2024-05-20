@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
     targetRevision: main
     path:  kustomize/overlays/dev
     kustomize:
@@ -32,7 +32,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
     targetRevision: main
     path:  kustomize/overlays/prod
     kustomize:

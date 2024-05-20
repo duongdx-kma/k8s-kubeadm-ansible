@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: web-ui-application
+  name: web-ui-application-fail-on-shared-resources
   namespace: argocd
 spec:
   destination:
@@ -15,7 +15,8 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true # argocd.argoproj.io/sync-options: ApplyOutOfSyncOnly=true
+      - ApplyOutOfSyncOnly=true #argocd.argoproj.io/sync-options: ApplyOutOfSyncOnly=true
+      - FailOnSharedResource=true #argocd.argoproj.io/sync-options: FailOnSharedResource=true
     automated:
       prune: true # argocd.argoproj.io/sync-options: Prune=true
       selfHeal: true

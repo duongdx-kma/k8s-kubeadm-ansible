@@ -1,12 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: web-ui-application
+  name: cross-cluster
   namespace: argocd
 spec:
   destination:
-    namespace: web-ui
-    server: https://kubernetes.default.svc
+    namespace: cross-cluster
+    server: https://192.168.49.2:8443
+    # name: "minikube-staging"
   project: default
   source:
     path: web-ui
@@ -15,7 +16,8 @@ spec:
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
-      - ApplyOutOfSyncOnly=true # argocd.argoproj.io/sync-options: ApplyOutOfSyncOnly=true
+      - ApplyOutOfSyncOnly=true #argocd.argoproj.io/sync-options: ApplyOutOfSyncOnly=true
+      - FailOnSharedResource=true #argocd.argoproj.io/sync-options: FailOnSharedResource=true
     automated:
       prune: true # argocd.argoproj.io/sync-options: Prune=true
       selfHeal: true

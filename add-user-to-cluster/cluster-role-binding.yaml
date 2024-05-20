@@ -1,0 +1,20 @@
+
+# kubectl create rolebinding admin --clusterrole=admin --user=user1 --user=user2 --group=group1 --dry-run -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-all-access-binding
+subjects:
+  - kind: User
+    name: "argocd"  # Replace with the actual user or service account
+    apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: devops
+    apiGroup: rbac.authorization.k8s.io
+  - kind: Group
+    name: maintainer
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: cluster-access
+  apiGroup: rbac.authorization.k8s.io

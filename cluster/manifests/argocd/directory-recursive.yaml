@@ -10,7 +10,7 @@ spec:
   project: default
   source:
     path:  directory-recursive
-    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
     targetRevision: main
     directory:
       recurse: true

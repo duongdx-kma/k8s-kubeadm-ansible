@@ -32,7 +32,7 @@ spec:
   project: testing-argocd
   source:
     path: web-ui
-    repoURL: https://github.com/duongdx-kma/k8s-manifetst-argocd-test.git
+    repoURL: git@github.com:duongdx-kma/k8s-manifetst-argocd-test.git
     targetRevision: main
   syncPolicy:
     syncOptions:

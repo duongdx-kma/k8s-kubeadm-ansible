@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-cm
+  namespace: argocd
+data:
+  accounts.duongdx: apiKey, login
+  accounts.duongdx.enabled: "true"
+
+  accounts.alice: apiKey, login
+  accounts.alice.enabled: "true"
+
+  accounts.kustomize-user: apiKey, login
+  accounts.kustomize-user.enabled: "true"
+
+  accounts.kustomize-admin: apiKey, login
+  accounts.kustomize-admin.enabled: "true"
+
+  accounts.pop: apiKey, login
+  # disables user. User is enabled by default
+  accounts.pop.enabled: "false"
