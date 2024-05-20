@@ -108,10 +108,9 @@
   - name: make master join command  #must set apiserver-advertise-address = standby-master-ip-address
     copy:
       content: "
-      {{ kubernetes_join_command.stdout_lines[0] }} \
-      --control-plane --certificate-key {{ kubernetes_certificate_key.stdout_lines[2] }} \
-      --apiserver-advertise-address={{ host_ip_string }}
-      "
+        {{ kubernetes_join_command.stdout_lines[0] }} \
+        --control-plane --certificate-key {{ kubernetes_certificate_key.stdout_lines[2] }} \
+        --apiserver-advertise-address={{ host_ip_string }}"
       dest: "/tmp/kubernetes_join_master_command"
 
   - name: Execute master join command
