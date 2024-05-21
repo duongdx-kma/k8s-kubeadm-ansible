@@ -80,7 +80,10 @@ Vagrant.configure("2") do |config|
         vb.cpus = 2
       end
       node.vm.hostname = "master0#{i}"
+      #manifests folder
       node.vm.synced_folder "./manifests", "/tmp/data", :mount_options => ["dmode=777", "fmode=666"]
+      #longhorn folder
+      node.vm.synced_folder "../longhorn", "/tmp/longhorn", :mount_options => ["dmode=777", "fmode=666"]
       node.vm.network :private_network, ip: IP_NW + "#{MASTER_IP_START + i}"
       node.vm.network "forwarded_port", guest: 22, host: "#{2780 + i}"
       node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"

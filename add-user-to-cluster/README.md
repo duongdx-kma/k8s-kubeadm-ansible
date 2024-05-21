@@ -45,10 +45,16 @@
 
 > kubectl auth can-i get pods --namespace=default --as=john
 
-- ##### 10. adding user to kube.config file:
+- ##### 10.a add cluster to kube.config file:
+
+> kubectl config set-cluster kubeadm-cluster --certificate-authority=/home/duongdx/.kube/kubeadm-cluster/kubeadm-cluster-ca.crt --server=https://192.168.56.167:6443
+
+
+- ##### 10.b adding user to kube.config file:
 > kubectl config set-credentials argocd --client-key=argocd.key --client-certificate=argocd.crt --embed-certs=true
 
-> kubectl config set-context argocd --cluster=kubernetes --user=argocd 
+- ##### 10.c set-context by cluster and user have just added to config file
+> kubectl config set-context argocd --cluster=kubeadm-cluster --user=argocd
 <!-- --cluster=kubernetes or --cluster=minikube depend on your purpose -->
 
 

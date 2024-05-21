@@ -63,6 +63,7 @@
         - ca-certificates
         - software-properties-common
         - bridge-utils
+        - jq
       state: present
       update_cache: yes # this option is the same 'apt-get update'
 
@@ -169,29 +170,28 @@
     # End: crictl configuration
 
   # ---
-  # if using vagrant nfs-common and open-iscsi already exist
-  #Start: install nfs-common:
-  # - name: install nfs client
-  #   apt:
-  #     name: nfs-common
-  #     state: absent
-  #     update_cache: yes
-  #   # notify: Restart nfs-common
-  # #End: install nfs-common:
-
-  # #Start: install open-iscsi:
-  # - name: install open-iscsi
-  #   apt:
-  #     name: open-iscsi
-  #     state: absent
-  #     update_cache: yes
-  #   # notify: Restart open-iscsi
-  #End: install open-iscsi:
-
-  # systemctl status nfs-common
-  - name: Restart nfs-common
-    systemd:
+  # Start: install nfs-common:
+  - name: install nfs client
+    apt:
       name: nfs-common
+      state: present
+      update_cache: yes
+    # notify: Restart nfs-common
+  # End: install nfs-common:
+
+  #Start: install open-iscsi:
+  - name: install open-iscsi
+    apt:
+      name: open-iscsi
+      state: present
+      update_cache: yes
+    # notify: Restart open-iscsi
+  # End: install open-iscsi:
+
+  # need install nfs-common and enable, start rpcbind
+  - name: Restart rpcbind
+    systemd:
+      name: rpcbind
       state: restarted
       enabled: true
       masked: no
