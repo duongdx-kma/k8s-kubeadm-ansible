@@ -1,3 +1,9 @@
+service:
+  ui:
+    type: "ClusterIP"
+  manager:
+    type: ClusterIP
+
 defaultDataPath: /data/longhorn-storage/
 defaultReplicaCount: 2
 backupstorePollInterval: 500

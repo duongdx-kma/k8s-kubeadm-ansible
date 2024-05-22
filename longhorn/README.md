@@ -38,3 +38,40 @@ helm show values longhorn/longhorn > longhorn.values.yml
 ```
 helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --values longhorn.values.yml
 ```
+
+- ### create longhorn user:
+```
+USER=<USERNAME_HERE>; PASSWORD=<PASSWORD_HERE>; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+
+
+USER=duongdx; PASSWORD=123456; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+
+kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+```
+
+- ### install nginx-ingress for expose longhorn
+```
+- helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
+- helm repo update
+
+- helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace --set controller.ingressClassResource.name=longhorn-storage-ingress
+
+# for verify
+- kubectl get ingressclass
+```
+
+- ### expose:
+
+- ##### get external-ip
+```
+- kubectl get services -n ingress-nginx
+- get ingress-nginx-controller EXTERNAL-IP
+```
+
+- ##### edit /etc/hosts:
+```
+    ...
+    192.168.56.201 (ingress-nginx-controller EXTERNAL-IP)  longhorn.ui.duongdx.com
+    ...
+```
