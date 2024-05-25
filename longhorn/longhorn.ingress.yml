@@ -11,6 +11,11 @@ items:
       # prevent the controller from redirecting (308) to HTTPS
       nginx.ingress.kubernetes.io/ssl-redirect: 'false'
       # name of the secret that contains the user/password definitions
+      # $ USER=foo; PASSWORD=bar; echo "${USER}:$(openssl passwd -stdin -apr1 <<< ${PASSWORD})" >> auth
+      # $ cat auth
+      # foo:$apr1$FnyKCYKb$6IP2C45fZxMcoLwkOwf7k0
+      # $ kubectl -n longhorn-system create secret generic basic-auth --from-file=auth
+      ##
       nginx.ingress.kubernetes.io/auth-secret: basic-auth
       # message to display with an appropriate context why the authentication is required
       nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required '
