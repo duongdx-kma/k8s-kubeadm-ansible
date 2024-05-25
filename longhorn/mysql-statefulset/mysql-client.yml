@@ -1,0 +1,18 @@
+#https://loft.sh/blog/kubernetes-statefulset-examples-and-best-practices/
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mysql-client
+spec:
+  containers:
+  - name: mysql-container
+    image: imega/mysql-client:10.1.32
+    command: ['sh','-c', "sleep 1800m"]
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        memory: 150Mi
+        cpu: 150m
+      requests:
+        memory: 100Mi
+        cpu: 100m

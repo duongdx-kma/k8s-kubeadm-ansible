@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: mysql
+  name: mysql-set
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysql
+  serviceName: "mysql"
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - image: duong1200798/socket_app_mysql:v1
+        name: mysql-container
+        ports:
+        - containerPort: 3306
+        envFrom:
+          - secretRef:
+              name: mysql-secret
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: mysql-store # same name
+
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-store # same name
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "longhorn-retain-storage"
+      resources:
+        requests:
+          storage: 500Mi
