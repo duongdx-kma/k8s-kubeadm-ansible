@@ -63,6 +63,7 @@
         - ca-certificates
         - software-properties-common
         - bridge-utils
+        - jq
       state: present
       update_cache: yes # this option is the same 'apt-get update'
 
@@ -169,14 +170,14 @@
     # End: crictl configuration
 
   # ---
-  #Start: install nfs-common:
+  # Start: install nfs-common:
   - name: install nfs client
     apt:
       name: nfs-common
       state: present
       update_cache: yes
-    notify: Restart nfs-common
-  #End: install nfs-common:
+    # notify: Restart nfs-common
+  # End: install nfs-common:
 
   #Start: install open-iscsi:
   - name: install open-iscsi
@@ -184,22 +185,43 @@
       name: open-iscsi
       state: present
       update_cache: yes
-    notify: Restart open-iscsi
-  #End: install nfs-common:
+    # notify: Restart open-iscsi
+  # End: install open-iscsi:
+
+  # need install nfs-common and enable, start rpcbind
+  - name: Restart rpcbind
+    systemd:
+      name: rpcbind
+      state: restarted
+      enabled: true
+      masked: no
+      daemon_reload: true
+
+  # systemctl status iscsid
+  - name: Restart iscsid
+    systemd:
+      name: iscsid
+      state: restarted
+      enabled: true
+      masked: no
+      daemon_reload: true
 
   handlers:
   - name: Restart containerd
-    service:
+    systemd:
       name: containerd
       state: restarted
+      daemon-reload: yes
 
-  - name: Restart nfs-common
-    service:
-      name: containerd
-      state: restarted
+  # - name: Restart nfs-common
+  #   systemd:
+  #     name: nfs-common
+  #     state: restarted
+  #     daemon_reload: true
 
 
-  - name: Restart open-iscsi
-    service:
-      name: open-iscsi
-      state: restarted
+  # - name: Restart open-iscsi
+  #   systemd:
+  #     name: open-iscsi
+  #     state: restarted
+  #     daemon_reload: true

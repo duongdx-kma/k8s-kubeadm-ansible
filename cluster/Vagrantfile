@@ -15,17 +15,17 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/bionic64"
   config.vm.box_check_update = false
 
-  config.vm.define "nfs-server" do |node|
-      node.vm.provider "virtualbox" do |vb|
-        vb.name = "nfs-server"
-        # vb.memory = 512
-        # vb.cpus = 0.5
-      end
-      node.vm.hostname = "nfs-server"
-      node.vm.network :private_network, ip: "192.168.56.198"
-      node.vm.network "forwarded_port", guest: 22, host: 12798
-      node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
-  end
+  # config.vm.define "nfs-server" do |node|
+  #     node.vm.provider "virtualbox" do |vb|
+  #       vb.name = "nfs-server"
+  #       # vb.memory = 512
+  #       # vb.cpus = 0.5
+  #     end
+  #     node.vm.hostname = "nfs-server"
+  #     node.vm.network :private_network, ip: "192.168.56.198"
+  #     node.vm.network "forwarded_port", guest: 22, host: 12798
+  #     node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
+  # end
 
   (1..NUM_RUNNER_NODE).each do |i|
     config.vm.define "runner0#{i}" do |node|
@@ -37,7 +37,7 @@ Vagrant.configure("2") do |config|
       node.vm.hostname = "runner0#{i}"
       node.vm.synced_folder "../gitlab-ci", "/tmp/gitlab-ci", :mount_options => ["dmode=777", "fmode=666"]
       node.vm.network :private_network, ip: IP_NW + "#{RUNNER_IP_START + i}"
-      node.vm.network "forwarded_port", guest: 22, host: "#{2210 + i}"
+      node.vm.network "forwarded_port", guest: 22, host: "#{6112 + i}"
       node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
     end
   end
@@ -80,7 +80,10 @@ Vagrant.configure("2") do |config|
         vb.cpus = 2
       end
       node.vm.hostname = "master0#{i}"
+      #manifests folder
       node.vm.synced_folder "./manifests", "/tmp/data", :mount_options => ["dmode=777", "fmode=666"]
+      #longhorn folder
+      node.vm.synced_folder "../longhorn", "/tmp/longhorn", :mount_options => ["dmode=777", "fmode=666"]
       node.vm.network :private_network, ip: IP_NW + "#{MASTER_IP_START + i}"
       node.vm.network "forwarded_port", guest: 22, host: "#{2780 + i}"
       node.vm.provision "setup-dns", type: "shell", :path => "../ubuntu/update-dns.sh"
