@@ -1,0 +1,133 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: mysql
+  name: mysql-set
+spec:
+  serviceName: mysql-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: duong1200798/socket_app_mysql:v1
+        name: mysql-container
+        ports:
+        - containerPort: 3306
+        envFrom:
+          - secretRef:
+              name: mysql-secret
+        volumeMounts:
+          - mountPath: /docker-entrypoint-initdb.d
+            name: mysql-initdb
+      volumes:
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config
+
+
+# apiVersion: apps/v1
+# kind: StatefulSet
+# metadata:
+#   labels:
+#     app: mysql
+#   name: mysql-set
+# spec:
+#   serviceName: mysql-headless
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: mysql
+#   template:
+#     metadata:
+#       labels:
+#         app: mysql
+#     spec:
+#       containers:
+#       - image: duong1200798/socket_app_mysql:v1
+#         name: mysql-container
+#         ports:
+#         - containerPort: 3306
+#         envFrom:
+#           - secretRef:
+#               name: mysql-secret
+#         volumeMounts:
+#           - mountPath: /docker-entrypoint-initdb.d
+#             name: mysql-initdb
+#           - mountPath: /var/lib/mysql
+#             name: mysql-store # same name
+
+#   volumeClaimTemplates:
+#   - metadata:
+#       name: mysql-store # same name
+#     spec:
+#       accessModes: ["ReadWriteOnce"]
+#       storageClassName: "longhorn-delete-storage"
+#       resources:
+#         requests:
+#           storage: 500Mi
+
+
+
+---
+# Service headless
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-headless
+spec:
+  clusterIP: None
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+
+---
+# Service ClusterIP
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-normal
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql
+  ports:
+    - name: tcp
+      protocol: TCP
+      port: 3306
+
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+data:
+  MYSQL_DATABASE: c29ja2V0LWFwcA==
+  MYSQL_ROOT_PASSWORD: ZHVvbmdkeDE=
+  MYSQL_PASSWORD: ZHVvbmdkeDE=
+  MYSQL_USER: ZHVvbmdkeA==
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+data:
+  privileges.sql: |
+    CREATE USER IF NOT EXISTS 'duongdx'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'duongdx';
+
+    CREATE DATABASE IF NOT EXISTS todo;
+    USE todo;
+    CREATE TABLE todo (id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), complete BOOLEAN);
+
+    GRANT ALL PRIVILEGES ON * . * TO 'duongdx'@'%';

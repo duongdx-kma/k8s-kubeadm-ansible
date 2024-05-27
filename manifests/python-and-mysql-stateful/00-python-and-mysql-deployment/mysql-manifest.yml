@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mysql
+  name: mysql-set
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: duong1200798/socket_app_mysql:v1
+        name: mysql-container
+        ports:
+        - containerPort: 3306
+        envFrom:
+          - secretRef:
+              name: mysql-secret
+        volumeMounts:
+          - mountPath: /docker-entrypoint-initdb.d
+            name: mysql-initdb
+      volumes:
+        - name: mysql-initdb
+          configMap:
+            name: mysql-initdb-config
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-normal
+spec:
+  ports:
+  - port: 3306
+    targetPort: 3306
+  selector:
+    app: mysql
+
+---
+# Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+data:
+  MYSQL_DATABASE: c29ja2V0LWFwcA==
+  MYSQL_ROOT_PASSWORD: ZHVvbmdkeDE=
+  MYSQL_PASSWORD: ZHVvbmdkeDE=
+  MYSQL_USER: ZHVvbmdkeA==
+
+---
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+data:
+  init.sql: |
+    CREATE USER IF NOT EXISTS 'duongdx'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'duongdx';
+
+    CREATE DATABASE IF NOT EXISTS todo;
+    USE todo;
+    CREATE TABLE todo (id INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), complete BOOLEAN);
+
+    GRANT ALL PRIVILEGES ON * . * TO 'duongdx'@'%';
