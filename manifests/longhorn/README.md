@@ -39,11 +39,7 @@ helm show values longhorn/longhorn > longhorn.values.yml
 
 ### 5. install longhorn:
 ```
-helm install longhorn longhorn/longhorn --namespace
-
-longhorn-system --create-namespace --values
-
-longhorn.values.yml
+helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace --values longhorn.values.yml
 ```
 
 ### 6. create longhorn user:
@@ -76,7 +72,7 @@ kubectl get ingressclass
 ```
 kubectl get services -n ingress-nginx
 
-get ingress-nginx-controller EXTERNAL-IP
+kubectl get ingress-nginx-controller EXTERNAL-IP
 ```
 
 ##### 8.2 edit /etc/hosts:
