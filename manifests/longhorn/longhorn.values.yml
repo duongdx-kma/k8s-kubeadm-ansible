@@ -4,11 +4,15 @@ service:
   manager:
     type: ClusterIP
 
-defaultDataPath: /data/longhorn-storage/
-defaultReplicaCount: 2
-backupstorePollInterval: 500
-nodeDownPodDeletionPolicy: do-nothing
+defaultSettings:
+  defaultReplicaCount: 2
+  defaultDataPath: /data/longhorn-storage/
+  backupstorePollInterval: 500
+  nodeDownPodDeletionPolicy: do-nothing
 
+persistence:
+  defaultClassReplicaCount: 2
+  
 ingress:
   # -- Setting that allows Longhorn to generate ingress records for the Longhorn UI service.
   enabled: true
